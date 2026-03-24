@@ -1,0 +1,27 @@
+name: rag-reduka
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+    - fastapi
+    - uvicorn[standard]
+    - python-multipart
+    - httpx
+    - langchain
+    - langchain-core
+    - langchain-community
+    - langchain-google-genai
+    - langchain-text-splitters
+    - langchain-chroma
+    - chromadb
+    - pydantic>=2.0
+    - pydantic-settings
+    - python-dotenv
+    - pyyaml
+    - tqdm
+    - black
+    - isort
+    - pypdf
