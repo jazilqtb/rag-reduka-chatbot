@@ -1,5 +1,6 @@
 [
     {
+        "id_soal": "1",
         "subject": "Penalaran Matematika",
         "jenis_ujian": "Tryout 1",
         "topik": "Waktu Dekomposisi Sampah",
@@ -11,6 +12,7 @@
         "pembahasan": ""
     },
     {
+        "id_soal": "2",
         "subject": "Penalaran Matematika",
         "jenis_ujian": "Tryout 1",
         "topik": "Perhitungan Biaya Pengiriman",
@@ -22,9 +24,10 @@
         "pembahasan": ""
     },
     {
+        "id_soal": "3",
         "subject": "Penalaran Matematika",
         "jenis_ujian": "Tryout 1",
-        "topik": "Diskon dan Harga Awal",
+        "topik": "Perhitungan Harga Diskon",
         "konteks_bacaan": "",
         "pertanyaan": "Harga sebuah kemeja setelah mendapatkan diskon 20% adalah Rp120.000,00. Berapakah harga awal kemeja tersebut sebelum didiskon?",
         "opsi": "A. Rp130.000,00 B. Rp140.000,00 C. Rp150.000,00 D. Rp160.000,00 E. Rp180.000,00",
@@ -33,9 +36,10 @@
         "pembahasan": ""
     },
     {
+        "id_soal": "4",
         "subject": "Penalaran Matematika",
         "jenis_ujian": "Tryout 1",
-        "topik": "Kecepatan Rata-rata",
+        "topik": "Perhitungan Kecepatan Rata-rata",
         "konteks_bacaan": "",
         "pertanyaan": "Sebuah mobil menempuh jarak 150 km dalam waktu 2 jam 30 menit. Jika mobil tersebut ingin menempuh jarak yang sama namun tiba 30 menit lebih cepat, berapakah kecepatan rata-rata yang harus digunakan?",
         "opsi": "A. 60 km/jam B. 65 km/jam C. 70 km/jam D. 75 km/jam E. 80 km/jam",
@@ -44,13 +48,14 @@
         "pembahasan": ""
     },
     {
+        "id_soal": "5",
         "subject": "Penalaran Matematika",
         "jenis_ujian": "Tryout 1",
-        "topik": "Waktu Dekomposisi Sampah (Berdasarkan Gambar)",
+        "topik": "Waktu Dekomposisi Sampah (Analisis Data)",
         "konteks_bacaan": "",
         "pertanyaan": "Sampah anorganik lebih lama terurai dibandingakn dengan sampah organik. Waktu dekomposisi popok sekali pakai lebih lama dari plastik, namun kurang dari kulit sintetis. Berapa waktu dekomposisi yang mungkin dari popok sekali pakai?",
         "opsi": "A. 100 tahun B. 250 tahun C. 375 tahun D. 475 tahun E. 575 tahun",
-        "konteks_gambar": "Gambar menampilkan informasi mengenai \"Waktu Dekomposisi\". Di bagian atas, terdapat judul utama \"Waktu Dekomposisi\" dalam teks tebal berwarna hitam, diikuti oleh paragraf pengantar berwarna hitam yang menjelaskan: \"Setiap material sampah akan mengalami penguraian. Material sampah dapat berupa sampah organik dan sampah anorganik. Waktu yang diperlukan untuk mengurai sempurna disebut sebagai waktu dekomposisi. Berikut waktu dekomposisi berdasarkan jenis material sampah.\" Di bawah teks pengantar, terdapat dua bagian informasi yang disajikan berdampingan. Di sisi kiri, terdapat sebuah tabel berjudul \"Tabel Waktu Dekomposisi Sampah Organik\". Tabel ini memiliki dua kolom. Kolom pertama berjudul \"Material Organik\" dan kolom kedua berjudul \"Waktu Dekomposisi\". Kedua judul kolom ini berwarna putih dengan latar belakang ungu gelap. Isi tabel, dengan latar belakang ungu muda, mencantumkan lima jenis material organik beserta waktu dekomposisinya: 1. Kulit pisang: 6 minggu 2. Kulit jeruk: 5 bulan 3. Kantong kertas: 8 minggu 4. Sisa apel: 2 bulan 5. Kertas tisu: 5 minggu Di sisi kanan, terdapat sebuah diagram batang berjudul \"Diagram Waktu Dekomposisi Sampah Anorganik\". Diagram ini memiliki sumbu Y vertikal yang diberi label \"Tahun\" dan memiliki skala numerik dari 0 hingga 600, dengan interval 150 (titik-titik 0, 150, 300, 450, 600). Garis-garis grid horizontal berwarna abu-abu terang memanjang dari setiap nilai pada sumbu Y. Sumbu X horizontal menampilkan empat kategori material anorganik, dari kiri ke kanan: \"Plastik\", \"Baja\", \"Kaleng aluminium\", dan \"Kulit sintetis\". Empat batang vertikal berwarna oranye mewakili waktu dekomposisi untuk setiap material: 1. Batang untuk \"Plastik\" mencapai ketinggian sekitar 375 tahun pada sumbu Y. 2. Batang untuk \"Baja\" mencapai ketinggian sekitar 75 tahun pada sumbu Y. 3. Batang untuk \"Kaleng aluminium\" mencapai ketinggian sekitar 225 tahun pada sumbu Y. 4. Batang untuk \"Kulit sintetis\" mencapai ketinggian sekitar 500 tahun pada sumbu Y. Latar belakang keseluruhan gambar berwarna putih, dengan strip biru muda di bagian paling atas.",
+        "konteks_gambar": "Gambar menampilkan informasi mengenai \"Waktu Dekomposisi\". Di bagian atas, terdapat judul utama \"Waktu Dekomposisi\" diikuti oleh paragraf pengantar yang menjelaskan bahwa setiap material sampah mengalami penguraian, dapat berupa sampah organik atau anorganik, dan waktu yang diperlukan untuk mengurai sempurna disebut waktu dekomposisi. Paragraf tersebut juga menyatakan bahwa informasi yang disajikan adalah waktu dekomposisi berdasarkan jenis material sampah.\n\nDi sisi kiri bawah gambar, terdapat \"Tabel Waktu Dekomposisi Sampah Organik\". Tabel ini memiliki dua kolom dengan header berwarna ungu: \"Material Organik\" dan \"Waktu Dekomposisi\". Isi tabel adalah sebagai berikut:\n- Baris pertama: Kulit pisang, 6 minggu\n- Baris kedua: Kulit jeruk, 5 bulan\n- Baris ketiga: Kantong kertas, 8 minggu\n- Baris keempat: Sisa apel, 2 bulan\n- Baris kelima: Kertas tisu, 5 minggu\n\nDi sisi kanan bawah gambar, terdapat \"Diagram Waktu Dekomposisi Sampah Anorganik\" yang disajikan dalam bentuk diagram batang vertikal.\n- Sumbu Y (vertikal) diberi label \"Tahun\" dan memiliki skala numerik yang dimulai dari 0, dengan garis grid horizontal pada 0, 150, 300, 450, dan 600.\n- Sumbu X (horizontal) menampilkan empat kategori material anorganik: Plastik, Baja, Kaleng aluminium, dan Kulit sintetis.\n- Terdapat empat batang vertikal berwarna oranye kecoklatan yang mewakili waktu dekomposisi untuk setiap material:\n    - Batang untuk \"Plastik\" mencapai ketinggian sekitar 375 tahun, posisinya berada di antara garis grid 300 dan 450.\n    - Batang untuk \"Baja\" mencapai ketinggian sekitar 80 tahun, posisinya berada di antara garis grid 0 dan 150.\n    - Batang untuk \"Kaleng aluminium\" mencapai ketinggian sekitar 250 tahun, posisinya berada di antara garis grid 150 dan 300.\n    - Batang untuk \"Kulit sintetis\" mencapai ketinggian sekitar 480 tahun, posisinya berada di antara garis grid 450 dan 600.\nLatar belakang keseluruhan gambar berwarna putih keabu-abuan.",
         "kunci_jawaban": "",
         "pembahasan": ""
     }

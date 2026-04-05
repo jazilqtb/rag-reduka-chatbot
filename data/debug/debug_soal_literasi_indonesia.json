@@ -1,8 +1,9 @@
 [
     {
+        "id_soal": "1",
         "subject": "Literasi Bahasa Indonesia",
         "jenis_ujian": "Tryout 1",
-        "topik": "Saran untuk intoleransi laktosa",
+        "topik": "Saran untuk penderita intoleransi laktosa",
         "konteks_bacaan": "Khasiat susu bagi tubuh kita sudah tidak diragukan lagi. Meskipun demikian, tidak setiap orang bersedia mengonsumsi susu. Ada dua kemungkinan penyebabnya: pertama, karena sifat yang terkandung dalam susu yang tidak disukai orang; kedua, karena sifat biologis orang yang bersangkutan (intoleran), yang ditandai dengan gangguan pencernaan seperti diare, perut kembung, dan sering buang angin setelah minum susu. Penyebab pertama dapat diatasi dengan penambahan sari jeruk, markisa, apel, atau lainnya sehingga rasa asli susu yang memualkan dapat dihilangkan. Sementara itu, penyebab kedua dapat diatasi dengan menggantinya dengan air susu yang telah mengalami perlakuan khusus, yaitu fermentasi. Secara biologis, penderita intoleran susu tidak mampu mencerna laktosa dari makanan atau minuman dalam susu sehingga terjadi penimbunan laktosa dalam usus. Penderita yang demikian dapat meminum susu bubuk dengan kadar laktosa rendah atau air susu fermentasi, seperti yoghurt, kefir, dan koumis.",
         "pertanyaan": "Berdasarkan bacaan di atas, bila seorang temanmu, Ari, mengeluh bahwa ia sebenarnya ingin minum susu seperti teman lainnya, tetapi selalu diare ketika minum susu. Apa yang akan kamu sarankan?",
         "opsi": "A. Ari dapat mencoba minum susu dengan menambah sari jeruk. B. Ari dapat mencoba susu bubuk seperti susu yang diminum oleh balita. C. Ari dapat mencoba minum yoghurt. D. Ari tidak perlu minum susu sama sekali. E. Ari dapat mencoba minum susu secara bertahap.",
@@ -11,9 +12,10 @@
         "pembahasan": ""
     },
     {
+        "id_soal": "2",
         "subject": "Literasi Bahasa Indonesia",
         "jenis_ujian": "Tryout 1",
-        "topik": "Ide bisnis dari hobi",
+        "topik": "Identifikasi kalimat penutup dalam teks",
         "konteks_bacaan": "(1) Ide bisnis dengan modal kecil bisa dimulai dari rumah, terutama bagi para pencinta kucing. (2) Kucing adalah hewan peliharaan yang imut dan lucu. (3) Biasanya, orang memelihara kucing untuk menghilangkan rasa kesepian, tetapi sebetulnya ada peluang bisnis yang menarik di luar hal tersebut. (4) Contoh peluang bisnis tersebut adalah menjadi content creator. (5) Pemilik kucing bisa membuat konten tentang kucingnya, seperti cara perawatannya, jenis makanan yang dikonsumsinya, atau tingkah lucu dari kucingnya tersebut. (6) Saat membuat konten, pemilik kucing juga bisa memakaikan baju atau aksesori pada kucingnya. (7) Pemilik kucing pun bisa mendapatkan sumber pendapatan baru apabila ia juga menjual baju dan aksesori tersebut. (8) Jika tidak bisa memproduksi baju dan aksesori kucing sendiri, pemilik kucing harus bisa mencari produsen yang menjual barang-barang tersebut dengan harga murah agar ia tetap mendapat keuntungan saat menjual kembali produknya. (9) Selain baju dan aksesori, pemilik kucing juga bisa mendapat pendapatan tambahan dengan menjual makanan favorit kucingnya. (10) Menjual makanan favorit kucing peliharaan juga bisa dilakukan dengan modal yang tidak besar. (11) Dengan melakukan hal-hal tersebut, pencinta kucing dapat mendapatkan cuan sambil menjalani hal yang disenangi.",
         "pertanyaan": "Berdasarkan teks di atas, memberi tahu pembaca bahwa melakukan hal yang disenangi juga dapat mendatangkan untung merupakan alasan penulis dalam mengungkapkan kalimat nomor...",
         "opsi": "A. 1 B. 3 C. 5 D. 9 E. 11",
@@ -22,9 +24,10 @@
         "pembahasan": ""
     },
     {
+        "id_soal": "3",
         "subject": "Literasi Bahasa Indonesia",
         "jenis_ujian": "Tryout 1",
-        "topik": "Profesi tambahan dari hobi",
+        "topik": "Profesi tambahan untuk pemilik kucing",
         "konteks_bacaan": "(1) Ide bisnis dengan modal kecil bisa dimulai dari rumah, terutama bagi para pencinta kucing. (2) Kucing adalah hewan peliharaan yang imut dan lucu. (3) Biasanya, orang memelihara kucing untuk menghilangkan rasa kesepian, tetapi sebetulnya ada peluang bisnis yang menarik di luar hal tersebut. (4) Contoh peluang bisnis tersebut adalah menjadi content creator. (5) Pemilik kucing bisa membuat konten tentang kucingnya, seperti cara perawatannya, jenis makanan yang dikonsumsinya, atau tingkah lucu dari kucingnya tersebut. (6) Saat membuat konten, pemilik kucing juga bisa memakaikan baju atau aksesori pada kucingnya. (7) Pemilik kucing pun bisa mendapatkan sumber pendapatan baru apabila ia juga menjual baju dan aksesori tersebut. (8) Jika tidak bisa memproduksi baju dan aksesori kucing sendiri, pemilik kucing harus bisa mencari produsen yang menjual barang-barang tersebut dengan harga murah agar ia tetap mendapat keuntungan saat menjual kembali produknya. (9) Selain baju dan aksesori, pemilik kucing juga bisa mendapat pendapatan tambahan dengan menjual makanan favorit kucingnya. (10) Menjual makanan favorit kucing peliharaan juga bisa dilakukan dengan modal yang tidak besar. (11) Dengan melakukan hal-hal tersebut, pencinta kucing dapat mendapatkan cuan sambil menjalani hal yang disenangi.",
         "pertanyaan": "Berdasarkan kalimat nomor (4) dan (5) pada Teks 2, apa salah satu profesi yang disarankan penulis bagi pemilik kucing untuk mendapatkan penghasilan tambahan? Catatan: Jawab dengan satu atau dua kata saja.",
         "opsi": "",

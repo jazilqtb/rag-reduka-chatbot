@@ -1,8 +1,9 @@
 [
     {
+        "id_soal": "1",
         "subject": "Literasi Bahasa Inggris",
         "jenis_ujian": "Tryout 1",
-        "topik": "Measles and its effects",
+        "topik": "Measles and its complications",
         "konteks_bacaan": "Measles, a childhood disease, has caused suffering to mankind for thousands of years. However, the search for an effective measles vaccine lasted two hundred years and has finally ended in success. Now, for the first time, measles is a preventable disease. You may ask, \"How is this important to children?\" Every year measles kills twice as many Americans as polio does. More children die from measles than from any other common childhood disease. Also complications of some degree occur in about one child out of six. Most complication include pneumonia and ear disorders. Another after-effect of measles-brain damage is less common, but it can have such serious consequence that it deserves special attention. In reality, a relation has been found between measles and such things as behavior problems, personality changes and dulling of metal ability. For example, a child may be bad-tempered or a little slow to learn after he has recovered from measles.",
         "pertanyaan": "One of the important findings of the research on measles is that...",
         "opsi": "A. children who have got measles may become difficult to handle because of their behavior. B. in reality, there are no measles patients who get brain damage. C. personality changes already occur at the time a child has measles. D. measles can cause children to become physically handicapped. E. measles is the first killer of childhood disease in the world.",
@@ -11,9 +12,10 @@
         "pembahasan": ""
     },
     {
+        "id_soal": "2",
         "subject": "Literasi Bahasa Inggris",
         "jenis_ujian": "Tryout 1",
-        "topik": "Dumbphones vs Smartphones",
+        "topik": "Dumbphones and digital detox",
         "konteks_bacaan": "Seventeen-year-old Robin West is an anomaly among her peers, she doesn't have a smartphone. Instead of scrolling through apps like TikTok and Instagram all day, she uses a so-called \"dumbphone\". These are basic phones, or feature phones, with very limited functionality compared to say an iPhone. You can typically only make and receive calls and SMS text messages. Ms West's decision to ditch her former smartphone two years ago was a spur of the moment thing. While looking for a replacement phones in a second-hand shop, she was lured by the low price of a \"brick phone\". Her current phones, from French firm MobiWire, cost her just 8 pounds. And because it has no smartphone functionality, she doesn't have an expensive monthly data bill to worry about. She had a lot of social media apps on it, and she didn't get as much work done as she was always on the phone.",
         "pertanyaan": "The writer says in paragraph 1 that dumbphones...",
         "opsi": "A. are slightly different from iPhones in term of functionality. B. are the same as old phones with very limited features. C. were firstly available in stores in the late 1990s. D. lose internet connection almost all the time. E. don't have camera or radio features.",
@@ -22,9 +24,10 @@
         "pembahasan": ""
     },
     {
+        "id_soal": "3",
         "subject": "Literasi Bahasa Inggris",
         "jenis_ujian": "Tryout 1",
-        "topik": "Dumbphones vs Smartphones",
+        "topik": "Dumbphones and digital detox",
         "konteks_bacaan": "Seventeen-year-old Robin West is an anomaly among her peers, she doesn't have a smartphone. Instead of scrolling through apps like TikTok and Instagram all day, she uses a so-called \"dumbphone\". These are basic phones, or feature phones, with very limited functionality compared to say an iPhone. You can typically only make and receive calls and SMS text messages. Ms West's decision to ditch her former smartphone two years ago was a spur of the moment thing. While looking for a replacement phones in a second-hand shop, she was lured by the low price of a \"brick phone\". Her current phones, from French firm MobiWire, cost her just 8 pounds. And because it has no smartphone functionality, she doesn't have an expensive monthly data bill to worry about. She had a lot of social media apps on it, and she didn't get as much work done as she was always on the phone.",
         "pertanyaan": "Based on Text 2, what was the idiom used to describe Robin West's sudden and unplanned decision to switch to a brick phone? Catatan: Jawab dengan frasa dari teks.",
         "opsi": "",
