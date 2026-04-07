@@ -43,8 +43,9 @@ class IngestionService():
         )
 
         self.vector_store = Chroma(
+            collection_name="RAG_REDUKA_DOC_KNOWLEDGE",
             embedding_function=self.embeddings,
-            persist_directory=str(self.db_dir)
+            persist_directory=str(self.db_dir)   
         )
 
         # Prompt configuration
@@ -78,23 +79,41 @@ class IngestionService():
         
     def parse_answer_key(self, filepath: str) -> dict:
         """Mengekstrak kunci jawaban (Pilihan Ganda maupun Essay) menggunakan Regex"""
+        # Check file jawaban
         if not os.path.exists(filepath):
             self.logger.warning(f"File kunci jawaban tidak ditemukan: {filepath}")
             return {}
-            
+        
+        # Open and ekstrak all text in every page
         doc = pymupdf.open(filepath)
         text = ""
         for page in doc:
             text += page.get_text()
         doc.close()
         
-        # PERUBAHAN REGEX: 
-        # Menangkap angka, titik, lalu menangkap seluruh teks/kalimat setelahnya hingga ganti baris.
-        # Cocok untuk "1. A" maupun "3. Content Creator"
-        matches = re.findall(r'(\d+)\.\s*(.*)', text)
+        """
+            Pernyataan r'(\d+)\.\s*(.*)' digunakan untuk ekstrak daftar bernomor dari teks
+
+            (\d)
+                - \d = digit (0-9)
+                - + = satu atau lebih
+                - () = capturing group
+                Artinya: Mengambl angka (nomor urutan)
+                Contoh: 1, 23, 456
+            
+            \.
+                - Titik (.) adalah karakter spesial di regex (artinya “apa saja”),
+                jadi harus di-escape dengan \.
+                Artinya: mencocokkan titik literal
+                Contoh: dari 1. → ini bagian titiknya
+
+            \s artinya whitespace
+                - * = nol atau lebih
+        """
+        matches = re.findall(r'(\d+)\.\s*(.*)', text) # matches berisi list [('nomor_soal', 'kunci jawban')]
         
         # Bersihkan spasi kosong (strip) pada hasil tangkapan
-        answer_dict = {num: ans.strip() for num, ans in matches}
+        answer_dict = {num: ans.strip() for num, ans in matches} # dijadikan dict
         
         self.logger.info(f"Berhasil mengekstrak {len(answer_dict)} kunci jawaban dari {os.path.basename(filepath)}")
         return answer_dict
@@ -102,22 +121,24 @@ class IngestionService():
     def parse_pdf_multimodal(self, file_path: str) -> str:
         """Mengekstrak teks dan gambar dari PDF, lalu menggabungkannya"""
         self.logger.info(f"Membaca PDF: {os.path.basename(file_path)}")
+
+        # open pdf file
         doc = pymupdf.open(file_path)
         
-        full_text = ""
+        full_text = "" # isi full text
         captions_queue = [] # Antrean untuk menyimpan deskripsi gambar
 
         for page_num, page in enumerate(doc):
-            blocks = page.get_text("dict")["blocks"]
+            blocks = page.get_text("dict")["blocks"] # "dict" means get text and images
             
             for block in blocks:
-                if block['type'] == 0:  # Ini blok TEKS
+                if block['type'] == 0:  # Jika block nya adalah teks
                     for line in block["lines"]:
                         for span in line["spans"]:
                             full_text += span["text"] + " "
                     full_text += "\n"
                     
-                elif block['type'] == 1:  # Ini blok GAMBAR
+                elif block['type'] == 1:  # Jika blocknya adalah gambar
                     self.logger.info(f"Gambar terdeteksi di halaman {page_num + 1}. Melakukan captioning...")
                     image_bytes = block["image"]
                     
@@ -133,7 +154,7 @@ class IngestionService():
             inject_text = f"\n\n--- KONTEKS GAMBAR: {caption} ---\n\n"
             full_text = full_text.replace("[GAMBAR]", inject_text, 1)
 
-        return full_text
+        return full_text # type(str) berisi full text pdf + image caption (raw text)
     
     def structure_text_to_documents(self, raw_text: str, filename: str, answer_keys: dict) -> List[Document]:
         """Mengubah teks utuh menjadi JSON, menyuntikkan kunci jawaban, dan menyusun Vector"""
@@ -145,7 +166,7 @@ class IngestionService():
             response = self.llm.invoke(prompt)
             cleaned_json = response.content.replace('```json', '').replace('```', '').strip()
             
-            soal_list = json.loads(cleaned_json)
+            soal_list = json.loads(cleaned_json) 
             documents = []
 
             # VALIDASI: Pencocokan Jumlah Soal vs Jumlah Kunci Jawaban
@@ -164,7 +185,8 @@ class IngestionService():
                 
                 # Susun teks konten untuk di-embedding (digabung agar bisa dicari vector DB)
                 content = (
-                    f"Id Soal: {soal.get('id_soal', '')}\n"
+                    f"Nomor Soal: {soal.get('id_soal', '')}\n"
+                    f"Subject: {soal.get('subject', '')}\n"
                     f"Topik: {soal.get('topik', '')}\n"
                     f"Konteks Bacaan: {soal.get('konteks_bacaan', 'Tidak ada bacaan khusus')}\n" # Tambahan atribut bacaan
                     f"Soal: {soal.get('pertanyaan', '')}\n"
@@ -177,11 +199,23 @@ class IngestionService():
                 meta = {
                     "source": filename,
                     "subject": soal.get("subject", "Umum"),
-                    "jenis_ujian": soal.get("jenis_ujian", "Tryout")
+                    "jenis_ujian": soal.get("jenis_ujian", "Tryout"),
+                    "id_soal": soal.get('id_soal', ''),
+                    "subject": soal.get('subject', '')
                 }
                 
                 doc = Document(page_content=content, metadata=meta)
                 documents.append(doc)
+
+                """
+                document = Document(
+                    page_content="Hello, world!", metadata={"source": "https://example.com"}
+                )
+                print(f"type(document): {type(document)} = {document}")
+
+                output:
+                type(document): <class 'langchain_core.documents.base.Document'> = page_content='Hello, world!' metadata={'source': 'https://example.com'}
+                """
 
             # 2. Simpan hasil JSON ke file lokal untuk proses review / debugging Anda
             debug_file_path = os.path.join(self.debug_dir, f"debug_{filename.replace('.pdf', '')}.json")
@@ -189,7 +223,7 @@ class IngestionService():
                 json.dump(soal_list, f, indent=4, ensure_ascii=False)
             self.logger.info(f"File evaluasi JSON disimpan di: {debug_file_path}")
                 
-            return documents
+            return documents # documents = [('page_content':(teksss), 'metadata':{source:tekss, subject:bla bla})]
         except Exception as e:
             self.logger.error(f"Gagal melakukan structuring JSON: {e}\nResponse LLM: {response.content if 'response' in locals() else 'No Response'}")
             return []
@@ -210,12 +244,12 @@ class IngestionService():
         
         try:
             BATCH_SIZE = 20
-            total_chunks = len(chunks)
+            total_chunks = len(chunks) # setara jumlah soal
             
             self.logger.info(f"Total chunks: {total_chunks}. Strategy: Batch {BATCH_SIZE} with Retry Logic.")
 
             for i in range(0, total_chunks, BATCH_SIZE):
-                batch = chunks[i : i + BATCH_SIZE]
+                batch = chunks[i : i + BATCH_SIZE] # batch berisi teks soal dari 1 - akhir dalam satu file
                 
                 self.logger.info(f"Processing batch {i} to {i + len(batch)}...")
                 max_retries = 3
