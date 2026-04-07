@@ -35,6 +35,13 @@ class IngestionService():
             temperature=0.1 # Suhu rendah agar ekstraksi tidak halusinasi
         )
 
+        if os.path.exists(self.db_dir):
+            try:
+                shutil.rmtree(self.db_dir)
+                self.logger.info("The old database has been successfully deleted (Reset).")
+            except Exception as e:
+                self.logger.error(f"Failed to delete the old DB: {str(e)}")
+
         emb_model = getattr(settings, 'EMBEDDING_MODEL', "models/embedding-001")
         self.embeddings = GoogleGenerativeAIEmbeddings(
             model=emb_model,
@@ -233,14 +240,6 @@ class IngestionService():
         if not chunks:
             self.logger.warning("Chunks is empty.")
             return
-        
-        # Reset DB lama agar vector tidak duplikat saat dijalankan ulang
-        if os.path.exists(self.db_dir):
-            try:
-                shutil.rmtree(self.db_dir)
-                self.logger.info("The old database has been successfully deleted (Reset).")
-            except Exception as e:
-                self.logger.error(f"Failed to delete the old DB: {str(e)}")
         
         try:
             BATCH_SIZE = 20

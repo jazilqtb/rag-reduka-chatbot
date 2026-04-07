@@ -1,4 +1,7 @@
+import re
+
 from typing import List
+
 
 from langchain_core.documents import Document
 from langchain_chroma import Chroma
@@ -7,11 +10,14 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 from src.core.config import settings
 from src.core.logger import get_logger
+from src.services.regex_entities_extractor import RegexEntityExtractor
 
 class RAGService():
     def __init__(self):
         # initialize logger
         self.logger = get_logger("RAGService")
+
+        self.regex_entity_ext = RegexEntityExtractor()
 
         # initialize embedding_model
         self.embedding_model = GoogleGenerativeAIEmbeddings(
@@ -25,18 +31,24 @@ class RAGService():
             embedding_function=self.embedding_model,
             persist_directory=str(settings.CHROMA_PERSIST_DIR)
         )
-    
-    def search(self, query: str, k: int=3) -> List[Document]:
-        self.logger.info(f"Searching for query: '{query}'")
+
+    def _entities_parser_llm(self, query: str) -> Dict:
+        pass
+
+    def _similarity_search(self, query: str, k: int=3) -> List[Document]:
+        self.logger.info(f"Start: Similarity search for : '{query}")
         try:
-            self.logger.debug("Mulai jalankan pencarian context")
-            doc_result = self.vector_store.similarity_search(query, k=k)
-            self.logger.debug("Selesai menjalankan pencarian contect")
-            self.logger.info(f"Found {len(doc_result)} document results")
-            return doc_result
+            source = self.vector_store.similarity_search(query=query, k=k)
+            return source
         except Exception as e:
             self.logger.error(f"Error during search: {str(e)}")
             return []
+    
+    def _exact_search(self, query: str, id_soal: str="", subject: str="") -> List[Document]:
+        pass
+
+    def search():
+        pass
     
     def format_docs(self, docs: List[Document]) -> str:
         self.logger.info("Formatting docs....")
