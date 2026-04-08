@@ -16,9 +16,8 @@ class RAGService():
     def __init__(self):
         # initialize logger
         self.logger = get_logger("RAGService")
-
+        
         self.regex_entity_ext = RegexEntityExtractor()
-
         # initialize embedding_model
         self.embedding_model = GoogleGenerativeAIEmbeddings(
             model=settings.EMBEDDING_MODEL,
