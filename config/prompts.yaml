@@ -41,3 +41,6 @@ json_structuring_prompt: |
       "pembahasan": ""
     }
   ]
+
+entities_extractor_prompt: |
+  Ekstrak nomor soal & materi (Penalaran Umum, Penalaran Matematika, Literasi Bahasa Indonesia, Literasi Bahasa Inggris) dari query. Output hanya list dict: {"id_soal": str|None, "subject": str|None}. Contoh: [{"id_soal":"12","subject":"Penalaran Umum"}]. Jika ada multiple, pisahkan koma.
