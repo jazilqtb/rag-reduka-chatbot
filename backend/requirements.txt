@@ -1,0 +1,52 @@
+# ============================================================================
+# UTBK Tutor RAG Backend - Production Dependencies
+# ----------------------------------------------------------------------------
+# Install:
+#   python3 -m venv .venv
+#   source .venv/bin/activate
+#   pip install -r requirements.txt
+# ============================================================================
+
+
+# ── Web Framework ───────────────────────────────────────────────────────────
+fastapi>=0.110,<1.0
+uvicorn[standard]>=0.27
+python-multipart>=0.0.9
+
+
+# ── HTTP Client ─────────────────────────────────────────────────────────────
+httpx>=0.26
+
+
+# ── LLM & RAG Stack ─────────────────────────────────────────────────────────
+langchain>=0.1.0
+langchain-core>=0.1.0
+langchain-community>=0.0.20
+langchain-google-genai>=1.0.0
+langchain-chroma>=0.1.0
+langchain-text-splitters>=0.0.1
+chromadb>=0.4.22
+
+
+# ── Config & Validation ─────────────────────────────────────────────────────
+pydantic>=2.5,<3.0
+pydantic-settings>=2.1
+python-dotenv>=1.0
+pyyaml>=6.0
+
+
+# ── Database (PostgreSQL) ───────────────────────────────────────────────────
+sqlalchemy>=2.0,<3.0
+psycopg2-binary>=2.9
+
+
+# ── Cache & Mutex (Redis) ───────────────────────────────────────────────────
+redis>=5.0
+
+
+# ── PDF Processing ──────────────────────────────────────────────────────────
+pymupdf>=1.23
+
+
+# ── Utilities ───────────────────────────────────────────────────────────────
+tqdm>=4.66
