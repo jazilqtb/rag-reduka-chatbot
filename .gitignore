@@ -3,3 +3,36 @@ __pycache__/
 *.__pycache__
 .env
 *.ipynb
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment
+.env
+.env.local
+.venv/
+venv/
+env/
+
+# Editor
+.vscode
+.idea/
+*.swp
+.DS_Store
+
+# Data
+data/vector_store/
+data/debug/
+data/raw_docs/*.pdf
+
+# Jupyter
+*.ipynb
+.ipynb_checkpoints/
+
+# Docker
+*.log
