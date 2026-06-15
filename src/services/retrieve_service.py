@@ -44,8 +44,8 @@ class RetrieveService():
         self.logger = get_logger("RetrieveService")
 
         self.r = Redis(
-            host=getattr(settings, "REDIS_HOST", "localhost"),
-            port=getattr(settings, "REDIS_PORT", 6379),
+            host=settings.REDIS_HOST,
+            port=settings.REDIS_PORT,
             decode_responses=True,
         )
         
@@ -89,30 +89,9 @@ class RetrieveService():
     # -------------------------------------------------------------------------
 
     def _entities_parser_regex(self, query: str) -> list[dict]:
-        """
-        Ekstrak entitas menggunakan Regex — 0 API call, ~1ms.
-        Mengembalikan list kosong jika pola tidak cocok.
- 
-        PENTING: gagal ekstrak != tidak ada entitas dalam query.
-        Bisa juga frasa-nya tidak tercakup pola regex saat ini.
-        Itulah mengapa lapis berikutnya adalah similarity search
-        (bukan langsung asumsi follow-up).
-        """
         return self.regex_entity_ext.extract_entities(query)
 
     def _entities_parser_llm(self, query: str) -> list[dict]:
-        """
-        Ekstrak entitas menggunakan LLM — 1 Generation API call, ~1-3 detik.
- 
-        Dipakai HANYA jika:
-          1. Regex gagal mengekstrak
-          2. Similarity search tidak menemukan dokumen relevan
-          3. Redis entity cache kosong / expired
- 
-        Generation API jauh lebih mahal dari embedding API.
-        Jika anggaran sangat ketat, method ini bisa dinonaktifkan;
-        konsekuensinya chatbot mengembalikan list kosong pada kasus edge.
-        """
         if not self.entities_extractor_prompt:
             return []
  
@@ -155,18 +134,6 @@ class RetrieveService():
     def _similarity_search(
         self, query: str, k: int = 3, subject: Optional[str] = None
     ) -> List[Document]:
-        """
-        Semantic similarity search ke ChromaDB.
- 
-        BIAYA: 1 Gemini Embedding API call (query -> vektor).
-        Embedding API ~10-50x lebih murah dari Generation API, tapi tetap
-        ada biaya per call. Gunakan hanya saat exact search tidak bisa dipakai.
- 
-        Args:
-            query   : teks query siswa
-            k       : jumlah dokumen yang dikembalikan
-            subject : jika tersedia, tambahkan metadata filter untuk precision
-        """
         filter_dict = {"subject": subject} if subject else None
         self.logger.info(
             f"[SimilaritySearch] query='{query[:60]}', k={k}, "
@@ -267,7 +234,6 @@ class RetrieveService():
         Isi    : {"id_soal": "12", "subject": "Penalaran Matematika"}
         Ukuran : ~50 byte per user
         Tujuan : metadata filter ChromaDB pada follow-up question berikutnya
-        Catatan: TIDAK dikirim ke LLM — tidak menguras token.
         """
         if not entity.get("id_soal") and not entity.get("subject"):
             return
@@ -352,42 +318,9 @@ class RetrieveService():
     # -------------------------------------------------------------------------
  
     def search(self, user_id: str, query: str) -> List[Document]:
-        """
-        Orkestrasi pencarian konteks — 4 lapis diurutkan dari biaya terendah.
- 
-        Lapis 1  Regex + ChromaDB metadata filter          [0 API call]
-          Regex berhasil + id_soal ditemukan.
-          Exact search via _collection.get() — tanpa embedding.
- 
-        Lapis 2  ChromaDB similarity search                [1 Embedding API]
-          Regex gagal (atau dokumen tidak ditemukan di ChromaDB).
-          Regex gagal != tidak ada entitas; bisa frasa tidak umum.
-          Similarity search mencoba memahami query saat ini secara semantik
-          sebelum kita berasumsi bahwa ini adalah follow-up question.
- 
-        Lapis 3  Redis entity cache + re-fetch             [0 API call]
-          Similarity kosong / tidak relevan.
-          Baru sekarang kita asumsikan follow-up dari soal sebelumnya.
-          Ambil entity dari Redis -> metadata filter ulang ke ChromaDB.
- 
-        Lapis 4  LLM entity extractor                      [1 Generation API]
-          Semua lapis di atas gagal. Truly last resort.
-          Generation API jauh lebih mahal dari embedding API.
- 
-        Setelah pencarian berhasil pada lapis manapun:
-          - entity terakhir disimpan ke Redis (untuk follow-up berikutnya)
-          - dokumen disimpan ke Redis (sebagai safety-net fallback)
- 
-        Args:
-            user_id : ID unik siswa (dari ChatRequest.user_id)
-            query   : teks pertanyaan siswa
- 
-        Returns:
-            List[Document] — dokumen konteks untuk dikirim ke LLM prompt
-        """
         contexts: List[Document] = []
  
-        # -- Lapis 1: Regex + exact search (0 API call) -----------------------
+        # Regex + exact search (0 API call) -----------------------
         entities = self._entities_parser_regex(query.lower())
  
         if entities:
@@ -404,7 +337,7 @@ class RetrieveService():
  
             if contexts:
                 self._save_entity_history(user_id, entities[-1])
-                self._save_context_history(user_id, contexts)
+                self._save_context_history(user_id, contexts) 
                 return contexts
  
             # Regex menemukan entitas tapi dokumen belum ada di ChromaDB
@@ -415,13 +348,11 @@ class RetrieveService():
  
         # -- Lapis 2: Similarity search (1 Embedding API call) ----------------
         # Regex gagal bukan berarti query tidak punya entitas.
-        # Coba pahami query secara semantik sebelum asumsi follow-up.
         self.logger.info("[Search:L2] Regex kosong/gagal -> similarity search.")
         contexts = self._similarity_search(query, k=3)
  
         if contexts:
             self._save_context_history(user_id, contexts)
-            # Tidak save entity karena kita tidak tahu persis soal mana yang relevan
             return contexts
  
         # -- Lapis 3: Redis entity cache -> re-fetch (0 API call) -------------

@@ -1,5 +1,5 @@
 """
-RAG Chat Service — Tutor AI Reduka (UTBK SNBT)
+RAG Chat Service
 
 Tanggung jawab ChatService HANYA:
   1. Orkestrasi: panggil RetrieveService → format docs → panggil LLM
