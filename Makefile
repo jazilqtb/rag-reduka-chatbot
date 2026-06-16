@@ -5,6 +5,9 @@
 # Run `make help` (or just `make`) to see all available commands.
 # ============================================================================
 
+include .env
+export
+
 .DEFAULT_GOAL := help
 .PHONY: help install install-backend install-frontend dev dev-frontend \
         test lint format up up-infra down restart logs ps \
@@ -100,8 +103,8 @@ up-infra:
 	docker compose up -d postgres redis
 	@echo ""
 	@echo "✓ Infra ready. Backend can now connect to:"
-	@echo "  PostgreSQL : localhost:$${POSTGRES_PORT:-5432}"
-	@echo "  Redis      : localhost:$${REDIS_PORT:-6379}"
+	@echo "  PostgreSQL : localhost:$${POSTGRES_PORT}"
+	@echo "  Redis      : localhost:$${REDIS_PORT}"
 	@echo ""
 	@echo "  Run backend locally: make dev"
 
