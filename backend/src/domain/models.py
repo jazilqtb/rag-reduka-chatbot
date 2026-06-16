@@ -14,7 +14,7 @@ Selalu update file ini DAN init.sql secara konsisten saat schema berubah.
 """
 
 from datetime import datetime
-from typing import Any, List, Optional
+from typing import List, Optional
 
 from sqlalchemy import (
     BigInteger,
@@ -44,14 +44,15 @@ class Document(Base):
 
     __tablename__ = "documents"
 
-    file_id:           Mapped[str]      = mapped_column(String(80),  primary_key=True)
-    original_filename: Mapped[str]      = mapped_column(String(255), nullable=False)
-    stored_path:       Mapped[str]      = mapped_column(Text,        nullable=False)
-    file_type:         Mapped[str]      = mapped_column(String(20),  nullable=False)
-    mime_type:         Mapped[str]      = mapped_column(String(50),  nullable=False, default="application/pdf")
-    size_bytes:        Mapped[int]      = mapped_column(BigInteger,  nullable=False)
-    status:            Mapped[str]      = mapped_column(String(20),  nullable=False, default="uploaded")
-    chunk_count:       Mapped[int]      = mapped_column(Integer,     nullable=False, default=0)
+    file_id:           Mapped[str] = mapped_column(String(80),  primary_key=True)
+    original_filename: Mapped[str] = mapped_column(String(255), nullable=False)
+    stored_path:       Mapped[str] = mapped_column(Text,        nullable=False)
+    file_type:         Mapped[str] = mapped_column(String(20),  nullable=False)
+    jenis_ujian:       Mapped[str] = mapped_column(String(100), nullable=False)
+    mime_type:         Mapped[str] = mapped_column(String(50),  nullable=False, default="application/pdf")
+    size_bytes:        Mapped[int] = mapped_column(BigInteger,  nullable=False)
+    status:            Mapped[str] = mapped_column(String(20),  nullable=False, default="uploaded")
+    chunk_count:       Mapped[int] = mapped_column(Integer,     nullable=False, default=0)
     error_message:     Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     uploaded_at:       Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False,
@@ -59,8 +60,6 @@ class Document(Base):
     ingested_at:       Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     deleted_at:        Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    # Mirror dari init.sql — tidak strictly perlu di sini, tapi berguna sebagai
-    # dokumentasi dan fallback untuk testing dengan create_all().
     __table_args__ = (
         CheckConstraint(
             r"file_id ~ '^file_[a-zA-Z0-9_]+$'",
@@ -78,13 +77,20 @@ class Document(Base):
         CheckConstraint("chunk_count >= 0", name="documents_chunk_count_nonneg"),
         Index("idx_documents_uploaded_at", "uploaded_at"),
         Index("idx_documents_file_type",   "file_type"),
+        Index("idx_documents_jenis_ujian", "jenis_ujian"),
     )
 
     def __repr__(self) -> str:
         return (
             f"<Document(file_id={self.file_id!r}, type={self.file_type!r}, "
-            f"status={self.status!r}, chunks={self.chunk_count})>"
+            f"jenis={self.jenis_ujian!r}, status={self.status!r}, "
+            f"chunks={self.chunk_count})>"
         )
+
+    @property
+    def is_ingested(self) -> bool:
+        """Convenience flag — backward compat dengan response schema."""
+        return self.status == "ingested"
 
 
 # ══════════════════════════════════════════════════════════════════════════════

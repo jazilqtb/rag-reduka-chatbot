@@ -32,6 +32,7 @@ class DocumentRepository:
         original_filename: str,
         stored_path: str,
         file_type: str,
+        jenis_ujian: str,
         size_bytes: int,
         mime_type: str = "application/pdf",
     ) -> Document:
@@ -39,14 +40,16 @@ class DocumentRepository:
         Insert new document row. Commits on success.
 
         Raises:
-            sqlalchemy.exc.IntegrityError: jika file_id duplikat atau melanggar
-                                            CHECK constraint (file_type, format).
+            sqlalchemy.exc.IntegrityError: jika file_id duplikat, melanggar
+                                            CHECK constraint, atau filename
+                                            sudah ada (unique partial index).
         """
         doc = Document(
             file_id           = file_id,
             original_filename = original_filename,
             stored_path       = stored_path,
             file_type         = file_type,
+            jenis_ujian       = jenis_ujian,
             mime_type         = mime_type,
             size_bytes        = size_bytes,
             status            = "uploaded",
@@ -60,7 +63,7 @@ class DocumentRepository:
     # ── READ ────────────────────────────────────────────────────────────────
 
     def get_by_id(self, file_id: str, include_deleted: bool = False) -> Optional[Document]:
-        """Get single document by file_id. Returns None if not found."""
+        """Get single document by file_id. Returns None if not found / soft-deleted."""
         doc = self.session.get(Document, file_id)
         if doc is None:
             return None
@@ -68,11 +71,26 @@ class DocumentRepository:
             return None
         return doc
 
+    def find_by_filename(
+        self,
+        filename: str,
+        include_deleted: bool = False,
+    ) -> Optional[Document]:
+        """
+        Find document by original_filename. Returns None if not found.
+        Berguna untuk cek duplikat saat upload.
+        """
+        stmt = select(Document).where(Document.original_filename == filename)
+        if not include_deleted:
+            stmt = stmt.where(Document.deleted_at.is_(None))
+        return self.session.scalar(stmt)
+
     def list_all(
         self,
         *,
-        file_type: Optional[str] = None,
-        status:    Optional[str] = None,
+        file_type:   Optional[str] = None,
+        jenis_ujian: Optional[str] = None,
+        status:      Optional[str] = None,
         include_deleted: bool = False,
         page:  int = 1,
         limit: int = 20,
@@ -83,13 +101,14 @@ class DocumentRepository:
         Returns:
             (documents, total_count)
         """
-        # Base query
         stmt = select(Document)
 
         if not include_deleted:
             stmt = stmt.where(Document.deleted_at.is_(None))
         if file_type is not None:
             stmt = stmt.where(Document.file_type == file_type)
+        if jenis_ujian is not None:
+            stmt = stmt.where(Document.jenis_ujian == jenis_ujian)
         if status is not None:
             stmt = stmt.where(Document.status == status)
 
@@ -103,6 +122,20 @@ class DocumentRepository:
         docs   = list(self.session.scalars(stmt).all())
 
         return docs, total
+
+    def list_pending_soal(self) -> List[Document]:
+        """
+        Convenience: list file 'soal' yang belum diingest.
+        Dipakai oleh endpoint /v1/documents/ingest dengan ingest_all_pending=True.
+        """
+        stmt = (
+            select(Document)
+            .where(Document.deleted_at.is_(None))
+            .where(Document.file_type == "soal")
+            .where(Document.status == "uploaded")
+            .order_by(Document.uploaded_at.asc())
+        )
+        return list(self.session.scalars(stmt).all())
 
     def count_by_status(self, status: str) -> int:
         """Count active documents with given status."""

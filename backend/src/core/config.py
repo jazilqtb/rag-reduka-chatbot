@@ -8,15 +8,17 @@ class Settings(BaseSettings):
         extra="ignore"
     )
 
-    # Path Project
-    BASE_DIR: Path = Path(__file__).resolve().parent.parent.parent
-    DATA_DIR: Path = BASE_DIR / "data"
+    # ── Path Project ──────────────────────────────────────────────────────────
+    BASE_DIR:   Path = Path(__file__).resolve().parent.parent.parent
+    DATA_DIR:   Path = BASE_DIR / "data"
     PROMPT_DIR: Path = BASE_DIR / "config" / "prompts.yaml"
 
-    GOOGLE_API_KEY: str
-    GENAI_MODEL: str = "models/gemini-2.5-flash" 
+    # ── Google Gemini ─────────────────────────────────────────────────────────
+    GOOGLE_API_KEY:  str
+    GENAI_MODEL:     str = "models/gemini-2.5-flash"
     EMBEDDING_MODEL: str = "models/gemini-embedding-001"
 
+    # ── ChromaDB ──────────────────────────────────────────────────────────────
     CHROMA_PERSIST_DIR: Path = DATA_DIR / "vector_store"
 
     # ── Redis ─────────────────────────────────────────────────────────────────
@@ -35,7 +37,7 @@ class Settings(BaseSettings):
     POSTGRES_DB:       str
  
     # ── API Security ──────────────────────────────────────────────────────────
-    API_KEY: str  # Wajib di .env — digunakan BE untuk autentikasi ke RAG service
+    API_KEY: str  # Wajib di .env
  
     # ── Upload ────────────────────────────────────────────────────────────────
     MAX_UPLOAD_SIZE_MB: int = 50
@@ -46,19 +48,11 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
-if __name__=="__main__":
-    import yaml
-
-    print(f"type(settings.model_config): {type(settings.model_config)}")
-    print(f"settings.model_config: {settings.model_config}")
-    print(f"Path(__file__): {Path(__file__)}")
-    print(f"Path(__file__).resolve(): {Path(__file__).resolve()}")
-    print(f"Path(__file__).resolve().parent: {Path(__file__).resolve().parent}")
-    print(f"Path(__file__).resolve().parent.parent.parent: {Path(__file__).resolve().parent.parent.parent}")
-    print(f"Path(__file__).resolve().parent.parent.parent / data: {Path(__file__).resolve().parent.parent.parent / 'data'}")
-    print(settings.PROMPT_DIR)
-
-    with open(settings.PROMPT_DIR, 'r') as file:
-        data = yaml.safe_load(file)
-        print(f"prompts({type(data['prompts'])}): {data['prompts']}")
+if __name__ == "__main__":
+    print(f"BASE_DIR:       {settings.BASE_DIR}")
+    print(f"DATA_DIR:       {settings.DATA_DIR}")
+    print(f"PROMPT_DIR:     {settings.PROMPT_DIR}")
+    print(f"POSTGRES_HOST:  {settings.POSTGRES_HOST}")
+    print(f"POSTGRES_DB:    {settings.POSTGRES_DB}")
+    print(f"REDIS_HOST:     {settings.REDIS_HOST}")
 

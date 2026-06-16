@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS documents (
     original_filename VARCHAR(255) NOT NULL,
     stored_path       TEXT         NOT NULL,
     file_type         VARCHAR(20)  NOT NULL,
+    jenis_ujian       VARCHAR(100) NOT NULL,
     mime_type         VARCHAR(50)  NOT NULL DEFAULT 'application/pdf',
     size_bytes        BIGINT       NOT NULL,
     status            VARCHAR(20)  NOT NULL DEFAULT 'uploaded',
@@ -41,7 +42,9 @@ CREATE TABLE IF NOT EXISTS documents (
     CONSTRAINT documents_size_positive
         CHECK (size_bytes > 0),
     CONSTRAINT documents_chunk_count_nonneg
-        CHECK (chunk_count >= 0)
+        CHECK (chunk_count >= 0),
+    CONSTRAINT documents_jenis_ujian_nonempty
+        CHECK (length(trim(jenis_ujian)) > 0)
 );
 
 -- Indexes for common query patterns
@@ -55,6 +58,16 @@ CREATE INDEX IF NOT EXISTS idx_documents_uploaded_at
 CREATE INDEX IF NOT EXISTS idx_documents_file_type
     ON documents (file_type);
 
+CREATE INDEX IF NOT EXISTS idx_documents_jenis_ujian
+    ON documents (jenis_ujian);
+
+-- Unique constraint: tidak boleh ada 2 file aktif dengan filename sama
+-- (deleted_at IS NULL berarti partial unique index — file yang sudah dihapus
+-- soft tidak dihitung).
+CREATE UNIQUE INDEX IF NOT EXISTS uq_documents_filename_active
+    ON documents (original_filename)
+    WHERE deleted_at IS NULL;
+
 -- Column comments (visible via \d+ in psql)
 COMMENT ON TABLE  documents IS
     'Metadata persisten untuk file PDF yang diupload (soal/jawaban UTBK).';
@@ -62,6 +75,8 @@ COMMENT ON COLUMN documents.file_id IS
     'Unique identifier dengan format: file_{alphanum_underscore}';
 COMMENT ON COLUMN documents.file_type IS
     'Tipe file: "soal" (PDF pertanyaan) atau "jawaban" (PDF kunci jawaban)';
+COMMENT ON COLUMN documents.jenis_ujian IS
+    'Label ujian yang diberikan user saat upload. Contoh: "Tryout 1", "UTBK 2024"';
 COMMENT ON COLUMN documents.status IS
     'Lifecycle: uploaded -> ingested | failed. "deleted" untuk soft delete.';
 COMMENT ON COLUMN documents.chunk_count IS
