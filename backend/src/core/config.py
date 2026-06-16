@@ -20,12 +20,19 @@ class Settings(BaseSettings):
     CHROMA_PERSIST_DIR: Path = DATA_DIR / "vector_store"
 
     # ── Redis ─────────────────────────────────────────────────────────────────
-    REDIS_HOST:         str = "localhost"
-    REDIS_PORT:         int = 6379
+    REDIS_HOST:         str 
+    REDIS_PORT:         int
     REDIS_ENTITY_TTL:   int = 1800   # 30 menit  — entity cache (RetrieveService)
     REDIS_CONTEXT_TTL:  int = 1800   # 30 menit  — context cache (RetrieveService)
     REDIS_CHAT_TTL:     int = 86400  # 24 jam    — chat history (ChatService)
     REDIS_RATELIMIT_TTL:int = 60     # 1 menit   — sliding window rate limit
+
+    # ── PostgreSQL ─────────────────────────────────────────────────────────
+    POSTGRES_HOST:     str 
+    POSTGRES_PORT:     int 
+    POSTGRES_USER:     str
+    POSTGRES_PASSWORD: str
+    POSTGRES_DB:       str
  
     # ── API Security ──────────────────────────────────────────────────────────
     API_KEY: str  # Wajib di .env — digunakan BE untuk autentikasi ke RAG service
@@ -35,6 +42,7 @@ class Settings(BaseSettings):
  
     # ── Rate Limiting ─────────────────────────────────────────────────────────
     RATE_LIMIT_CHAT_MAX: int = 30   # maks request /chat per user per menit
+
 
 settings = Settings()
 
