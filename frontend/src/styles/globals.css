@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-canvas text-ink font-sans;
+    font-feature-settings: "ss01", "cv11";  /* Inter stylistic alternates */
+  }
+
+  /* Selection: pakai marker color sebagai signature */
+  ::selection {
+    @apply bg-marker text-ink;
+  }
+}
+
+@layer components {
+  /* Signature: highlighter underline untuk source citations */
+  .highlight-underline {
+    background-image: linear-gradient(transparent 60%, theme("colors.marker") 60%);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+  }
+
+  /* Focus ring untuk semua interactive elements */
+  .focus-ring {
+    @apply outline-none focus-visible:ring-2 focus-visible:ring-ai focus-visible:ring-offset-2 focus-visible:ring-offset-canvas;
+  }
+
+  /* Loading dots animasi */
+  .loading-dots > span {
+    @apply inline-block h-1.5 w-1.5 rounded-full bg-ai animate-pulse-dot;
+  }
+  .loading-dots > span:nth-child(2) { animation-delay: 0.16s; }
+  .loading-dots > span:nth-child(3) { animation-delay: 0.32s; }
+}
