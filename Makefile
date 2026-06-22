@@ -157,3 +157,19 @@ clean-data:
 	@sleep 5
 	@rm -rf backend/data/vector_store/* backend/data/debug/* backend/data/raw_docs/*.pdf 2>/dev/null || true
 	@echo "✓ Data cleaned."
+
+# ─── Frontend Build Modes ────────────────────────────────────────────────────
+
+# Mode default: build di container (standar untuk user di GitHub)
+up-ui:
+	docker compose --profile ui up -d
+
+# Mode local: pre-build di host, copy ke nginx container
+# Gunakan kalau npm registry dari dalam Docker container lambat / tidak reachable
+up-ui-local:
+	cd frontend && npm install && npm run build
+	docker compose -f docker-compose.yml -f docker-compose.local.yml \
+	               --profile ui up -d --build
+
+down-ui:
+	docker compose --profile ui down

@@ -1,18 +1,28 @@
+# syntax=docker/dockerfile:1.4
 # ============================================================================
-# UTBK Tutor RAG Frontend - Multi-stage build
-# Stage 1 (builder)  : install + npm run build → /app/dist
+# UTBK Tutor RAG Frontend - Self-contained Multi-stage Build
+# ----------------------------------------------------------------------------
+# Stage 1 (builder)  : install deps + npm run build → /app/dist
 # Stage 2 (runtime)  : nginx alpine serving static files
+#
+# BuildKit cache mount mempercepat rebuild dengan persist npm cache antar build.
+#
+# Untuk environment dengan koneksi npm registry lambat / tidak stabil,
+# gunakan Dockerfile.local sebagai alternatif (lihat README).
 # ============================================================================
 
 
 # ─── Stage 1: Builder ───────────────────────────────────────────────────────
-FROM node:20-alpine AS builder
+FROM node:20-slim AS builder
 
 WORKDIR /app
 
-# Copy package files first to leverage docker cache
-COPY package*.json ./
-RUN npm ci
+# Copy package files first untuk leverage Docker layer cache
+COPY package.json package-lock.json ./
+
+# BuildKit cache mount untuk npm — package re-use antar build
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --no-audit --no-fund
 
 # Copy source & build
 COPY . .
@@ -20,14 +30,10 @@ RUN npm run build
 
 
 # ─── Stage 2: Runtime ───────────────────────────────────────────────────────
-FROM nginx:alpine AS runtime
+FROM nginx:alpine
 
-# Custom nginx config: serve dist + SPA fallback
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Copy built assets
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 EXPOSE 80
-
 CMD ["nginx", "-g", "daemon off;"]
