@@ -26,8 +26,8 @@ mandiri supaya siapa pun bisa mencobanya.
 Inti masalahnya: siswa yang baru selesai tryout UTBK biasanya bingung dengan
 soal yang dijawab salah — mereka tahu kuncinya tapi tidak tahu **kenapa**
 jawabannya itu. Tutor AI ini mengambil PDF soal + kunci jawaban, mengingest
-ke vector store, lalu menjawab pertanyaan natural language siswa dengan
-mengacu ke soal spesifik via retrieval augmented generation.
+ke vector store, lalu menjawab pertanyaan siswa dengan
+mengacu ke soal spesifik menggunakan RAG.
 
 > 🎯 **Demo singkat:** start docker compose → buka frontend → tanya
 > *"Jelaskan soal nomor 3 Penalaran Umum"* → dapat penjelasan plus sitasi
@@ -49,7 +49,6 @@ mengacu ke soal spesifik via retrieval augmented generation.
 - **Incremental ingestion** — re-ingest 1 file tidak hapus chunk file lain di ChromaDB. Per-source delete-then-insert.
 - **Multimodal PDF parsing** — gambar di dalam PDF di-caption oleh LLM dan di-inject ke teks sebelum chunking, supaya soal yang punya grafik tetap bisa di-retrieve.
 - **Admin UI bawaan** — tab Dokumen untuk upload/ingest/delete PDF, tab Panduan dengan 6-langkah guide, status sistem real-time per komponen (Postgres/Redis/ChromaDB/Gemini/Storage).
-- **Markdown rendering** — jawaban chatbot merender bold, italic, heading, list, code block, table secara native tanpa asterisk.
 - **Microservice-friendly API** — RESTful dengan OpenAPI docs di `/docs`. Bisa dipakai sebagai backend untuk integrator lain.
 - **Comprehensive testing** — 69 test pass (pytest + fakeredis + SQLite in-memory).
 
@@ -137,7 +136,7 @@ Singkatnya:
 ## Design Decisions
 
 Empat keputusan teknis utama yang punya implikasi besar di arsitektur.
-Format ringkas; detail per-decision ada di `docs/decisions/`.
+Detail per-decision ada di `docs/decisions/`.
 
 | # | Decision | Trade-off yang diterima |
 |---|---|---|
@@ -228,11 +227,7 @@ tutor-utbk-rag-system/
 
 ## Contact
 
-- **Author:** Jazil Setiawan
-- **Email:** jazilsetiawan23@gmail.com
-- **LinkedIn:** [linkedin.com/in/jazilsetiawan](https://www.linkedin.com/in/jazilsetiawan/)
-- **GitHub:** [github.com/Jazil-CS25](https://github.com/Jazil-CS25/)
-
-## License
-
-[MIT](LICENSE)
+- **Author:** Ach. Jazilul Qutbi
+- **Email:** jazilulq@gmail.com
+- **LinkedIn:** [linkedin.com/in/achjazilulqutbi](https://www.linkedin.com/in/achjazilulqutbi/)
+- **GitHub:** [github.com/jazilqtb](https://github.com/jazilqtb/)
