@@ -31,8 +31,10 @@ from src.domain.schemas.document import (
     DocumentItem,
     DocumentListResponse,
     DocumentUploadResponse,
+    IngestJobListResponse,
     IngestJobResponse,
     IngestJobStatusResponse,
+    IngestJobSummary,
     IngestRequest,
 )
 
@@ -72,8 +74,8 @@ __all__ = [
     "ChatRequest", "ChatResponse", "ResponseMeta", "SourceItem",
     # Document
     "DocumentDeleteResponse", "DocumentItem", "DocumentListResponse",
-    "DocumentUploadResponse", "IngestJobResponse", "IngestJobStatusResponse",
-    "IngestRequest",
+    "DocumentUploadResponse", "IngestJobListResponse", "IngestJobResponse",
+    "IngestJobStatusResponse", "IngestJobSummary", "IngestRequest",
     # Session
     "MessageItem", "SessionClearResponse", "SessionHistoryResponse",
     # Health

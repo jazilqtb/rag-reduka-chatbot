@@ -10,9 +10,11 @@ Penjelasan komponen, alur request, dan reasoning di balik struktur sistem.
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                          Browser (User)                                  │
 │  ┌────────────────────────────────────────────────────────────────────┐ │
-│  │  React + Vite SPA                                                  │ │
-│  │   - Chat UI (App.tsx + components/)                                │ │
-│  │   - localStorage untuk settings                                    │ │
+│  │  React + Vite SPA (3 tab)                                          │ │
+│  │   - Chat UI    — tanya-jawab, markdown rendering, source citation  │ │
+│  │   - Admin UI   — upload/ingest/delete dokumen, status sistem       │ │
+│  │   - Panduan    — 6-langkah guide + FAQ                             │ │
+│  │   - localStorage untuk settings (baseUrl, apiKey)                  │ │
 │  │   - fetch dengan X-API-Key header                                  │ │
 │  └────────────────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────────────┘
@@ -196,3 +198,8 @@ awal. Stage 5 refactor split — sebelumnya semuanya di satu file
 | ChromaDB persist dir | `data/vector_store/` |
 | Uploaded PDFs | `data/raw_docs/` |
 | Debug ingestion JSON | `data/debug/` |
+| Frontend chat UI | `frontend/src/components/ChatWindow.tsx`, `MessageBubble.tsx` |
+| Frontend admin UI | `frontend/src/components/documents/`, `frontend/src/pages/DocumentsPage.tsx` |
+| Frontend navigation | `frontend/src/components/Navigation.tsx`, `frontend/src/App.tsx` |
+| Frontend API wrappers | `frontend/src/api/documents.ts` |
+| Frontend state hooks | `frontend/src/hooks/useDocuments.ts`, `useIngestJob.ts` |

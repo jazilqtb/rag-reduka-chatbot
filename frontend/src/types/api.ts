@@ -66,3 +66,101 @@ export interface AppSettings {
   apiKey:  string;
   userId:  string;
 }
+
+
+// ── Documents ────────────────────────────────────────────────────────────────
+
+export type DocType = "soal" | "jawaban";
+export type DocStatus = "uploaded" | "ingested" | "failed";
+
+export interface DocumentItem {
+  file_id:      string;
+  filename:     string;
+  doc_type:     DocType;
+  jenis_ujian:  string;
+  size_bytes:   number;
+  status:       DocStatus;
+  chunk_count?: number | null;
+  uploaded_at:  string;
+  ingested_at?: string | null;
+}
+
+export interface DocumentListResponse {
+  total: number;
+  page:  number;
+  limit: number;
+  items: DocumentItem[];
+}
+
+export interface UploadResponse {
+  file_id:     string;
+  filename:    string;
+  doc_type:    DocType;
+  jenis_ujian: string;
+  size_bytes:  number;
+}
+
+export interface IngestTriggerResponse {
+  job_id:       string;
+  files_queued: number;
+}
+
+export interface IngestJobStatus {
+  job_id:          string;
+  status:          "processing" | "done" | "failed";
+  files_queued:    number;
+  files_processed: number;
+  files_failed:    number;
+  errors:          string[];
+  created_at:      string;
+  completed_at?:   string | null;
+}
+
+export interface IngestJobSummary {
+  job_id:          string;
+  status:          string;
+  files_queued:    number;
+  files_processed: number;
+  files_failed:    number;
+  errors:          string[];
+  created_at:      string;
+  completed_at?:   string | null;
+}
+
+export interface IngestJobListResponse {
+  jobs:  IngestJobSummary[];
+  total: number;
+}
+
+export interface DeleteDocumentResponse {
+  file_id:               string;
+  deleted_from_storage:  boolean;
+  deleted_from_vectordb: boolean;
+  chunks_removed:        number;
+  message:               string;
+}
+
+// ── Health Detail ────────────────────────────────────────────────────────────
+
+export interface HealthComponent {
+  status:      "ok" | "error";
+  latency_ms?: number;
+  detail:      string;
+}
+
+export interface HealthDetailResponse {
+  status:     "ok" | "degraded" | "down";
+  timestamp:  string;
+  components: {
+    postgres?: HealthComponent;
+    redis?:    HealthComponent;
+    chromadb?: HealthComponent;
+    gemini?:   HealthComponent;
+    storage?:  HealthComponent;
+    [key: string]: HealthComponent | undefined;
+  };
+}
+
+// ── Navigation ───────────────────────────────────────────────────────────────
+
+export type AppPage = "chat" | "documents" | "getting-started";

@@ -204,6 +204,49 @@ di-allow di backend untuk demo.
 
 ---
 
+## Milestone 9: Admin UI — document management (Stage 7)
+
+Setelah chat UI ada, gap yang paling terasa: untuk upload file baru harus
+pakai curl atau Postman. Untuk visitor portfolio yang ingin mencoba, ini
+terlalu tinggi barrier-nya. Juga tidak ada cara melihat status ingestion
+atau menghapus dokumen tanpa CLI.
+
+Stage 7 menambahkan dua halaman baru tanpa menyentuh satu baris pun di
+service layer:
+
+**Tab Dokumen** — UI lengkap untuk siklus hidup dokumen:
+- Upload drag & drop dengan validasi nama file di client side (`soal_*.pdf` / `jawaban_*.pdf`)
+- Status card semua komponen backend dengan auto-fetch saat mount
+- Trigger ingestion + progress bar yang polling setiap 3 detik
+- Timeline riwayat job ingestion
+- Tabel dokumen dengan status badge dan hapus via confirmation modal
+
+**Tab Panduan** — guide 6 langkah dengan contoh format PDF soal/jawaban,
+aturan label jenis ujian, dan FAQ. Tombol navigasi antar halaman langsung
+dari konten panduan.
+
+Satu keputusan teknis menarik: backend `DocumentItem` schema awalnya
+mengembalikan `ingested: bool` bukan `status: string`. Admin UI butuh status
+yang lebih kaya (`uploaded` / `ingested` / `failed`) untuk badge warna.
+Solusi: tambah field `status` di schema (additive, backward compat) dan
+petakan ORM `doc.status` langsung. Field `ingested: bool` tetap ada untuk
+compat klien lama.
+
+Satu lagi: field `IngestJobSummary` di Pydantic tidak bisa langsung
+`model_validate()` dari ORM karena nama field berbeda (`total_files` vs
+`files_queued`, `started_at` vs `created_at`). Solusi pakai
+`validation_alias` di Pydantic v2 — alias untuk input, field name Python
+untuk serialisasi. Ini lebih bersih dari manual mapper karena tipe tetap
+type-safe.
+
+Juga di sesi ini: markdown rendering untuk chat bubble. Sebelumnya jawaban
+AI yang mengandung `**bold**` muncul sebagai plain text. Tambah
+`react-markdown` + `remark-gfm` dengan custom Tailwind components per
+elemen HTML. User pesan tetap plain text karena tidak ada nilai tambah
+markdown di sana.
+
+---
+
 ## Apa yang saya pelajari
 
 1. **Refactor bertahap > big-bang rewrite.** Stage 1-6 jadi possible karena

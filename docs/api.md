@@ -196,6 +196,36 @@ Minimal salah satu harus aktif:
 
 ---
 
+### `GET /v1/documents/ingest`
+
+List riwayat job ingestion terbaru, newest-first.
+
+**Query params:** `limit` (1-50, default 20)
+
+**Response 200:**
+
+```json
+{
+  "jobs": [
+    {
+      "job_id":          "job_2026_xyz789",
+      "status":          "completed",
+      "files_queued":    2,
+      "files_processed": 2,
+      "files_failed":    0,
+      "errors":          [],
+      "created_at":      "2026-01-15T10:30:00.000Z",
+      "completed_at":    "2026-01-15T10:32:15.000Z"
+    }
+  ],
+  "total": 1
+}
+```
+
+`status` di response ini adalah nilai DB langsung: `"pending"` | `"running"` | `"completed"` | `"failed"` | `"cancelled"`.
+
+---
+
 ### `GET /v1/documents/ingest/{job_id}`
 
 Polling status job ingestion.
@@ -225,6 +255,8 @@ List dokumen terdaftar. Pagination support.
 
 **Query params:** `doc_type`, `jenis_ujian`, `page`, `limit` (1-100, default 20)
 
+Field `status`: `"uploaded"` (belum diingest) | `"ingested"` | `"failed"`. Field `ingested` (boolean) juga ada untuk backward compat.
+
 **Response 200:**
 
 ```json
@@ -240,6 +272,7 @@ List dokumen terdaftar. Pagination support.
       "jenis_ujian": "Tryout 1",
       "size_bytes":  524288,
       "ingested":    true,
+      "status":      "ingested",
       "uploaded_at": "2026-01-15T10:00:00.000Z",
       "ingested_at": "2026-01-15T10:05:00.000Z",
       "chunk_count": 25

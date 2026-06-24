@@ -48,6 +48,8 @@ mengacu ke soal spesifik via retrieval augmented generation.
 - **Polyglot persistence** — Redis untuk TTL-based data (chat history, cache, rate limit), PostgreSQL untuk persistent metadata (documents, ingest jobs).
 - **Incremental ingestion** — re-ingest 1 file tidak hapus chunk file lain di ChromaDB. Per-source delete-then-insert.
 - **Multimodal PDF parsing** — gambar di dalam PDF di-caption oleh LLM dan di-inject ke teks sebelum chunking, supaya soal yang punya grafik tetap bisa di-retrieve.
+- **Admin UI bawaan** — tab Dokumen untuk upload/ingest/delete PDF, tab Panduan dengan 6-langkah guide, status sistem real-time per komponen (Postgres/Redis/ChromaDB/Gemini/Storage).
+- **Markdown rendering** — jawaban chatbot merender bold, italic, heading, list, code block, table secara native tanpa asterisk.
 - **Microservice-friendly API** — RESTful dengan OpenAPI docs di `/docs`. Bisa dipakai sebagai backend untuk integrator lain.
 - **Comprehensive testing** — 69 test pass (pytest + fakeredis + SQLite in-memory).
 
@@ -164,6 +166,7 @@ Endpoint utama:
 | `POST` | `/v1/chat` | Kirim query siswa, dapat jawaban + source citation |
 | `POST` | `/v1/documents/upload` | Upload PDF soal/jawaban |
 | `POST` | `/v1/documents/ingest` | Mulai job ingestion async |
+| `GET`  | `/v1/documents/ingest` | List riwayat job ingestion (newest-first) |
 | `GET`  | `/v1/documents/ingest/{job_id}` | Polling status job |
 | `GET`  | `/v1/documents` | List dokumen terdaftar |
 | `DELETE` | `/v1/documents/{file_id}` | Hapus dokumen (storage + vector store) |
@@ -193,6 +196,13 @@ tutor-utbk-rag-system/
 │   └── Dockerfile
 ├── frontend/               # React + Vite + TS + Tailwind
 │   ├── src/
+│   │   ├── api/            # client.ts + chat.ts + documents.ts
+│   │   ├── components/     # Header, Navigation, ChatWindow, MessageBubble…
+│   │   │   └── documents/  # SystemStatusCard, UploadDropzone, IngestPanel…
+│   │   ├── hooks/          # useChat, useSettings, useDocuments, useIngestJob
+│   │   ├── pages/          # DocumentsPage, GettingStartedPage
+│   │   ├── types/api.ts
+│   │   └── App.tsx
 │   ├── package.json
 │   └── Dockerfile
 ├── infra/postgres/init.sql # database schema

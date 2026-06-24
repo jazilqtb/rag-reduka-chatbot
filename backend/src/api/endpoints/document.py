@@ -28,7 +28,7 @@ import threading
 from datetime import datetime
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
 from redis import Redis
 
 from src.api.deps import (
@@ -50,8 +50,10 @@ from src.domain.schemas import (
     DocumentListResponse,
     DocumentUploadResponse,
     ErrorResponse,
+    IngestJobListResponse,
     IngestJobResponse,
     IngestJobStatusResponse,
+    IngestJobSummary,
     IngestRequest,
 )
 
@@ -91,6 +93,7 @@ def _doc_to_item(doc: Document) -> DocumentItem:
         jenis_ujian = doc.jenis_ujian,
         size_bytes  = doc.size_bytes,
         ingested    = doc.is_ingested,
+        status      = doc.status if doc.status in ("uploaded", "ingested", "failed") else "uploaded",
         uploaded_at = doc.uploaded_at.isoformat() if doc.uploaded_at else "",
         ingested_at = doc.ingested_at.isoformat() if doc.ingested_at else None,
         chunk_count = doc.chunk_count,
@@ -644,4 +647,22 @@ async def delete_document(
             f"File '{filename}' berhasil dihapus. "
             f"{chunks_removed} chunk dihapus dari ChromaDB."
         ),
+    )
+
+
+@router.get(
+    "/ingest",
+    response_model=IngestJobListResponse,
+    summary="List recent ingest jobs",
+    description="Return N most recent ingest jobs newest-first. Untuk tracing history.",
+)
+async def list_ingest_jobs(
+    limit:    int  = Query(default=20, ge=1, le=50, description="Maks jumlah job yang dikembalikan"),
+    _:        None = Depends(require_api_key),
+    job_repo: IngestJobRepository = Depends(get_ingest_job_repository),
+) -> IngestJobListResponse:
+    jobs = job_repo.list_recent(limit=limit)
+    return IngestJobListResponse(
+        jobs=[IngestJobSummary.model_validate(j) for j in jobs],
+        total=len(jobs),
     )

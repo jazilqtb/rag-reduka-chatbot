@@ -7,8 +7,9 @@ Schemas untuk endpoint /v1/documents/*.
   Delete   : DocumentDeleteResponse
 """
 
+from datetime import datetime
 from typing import List, Optional
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from .validators import RE_FILE_ID
 
@@ -109,6 +110,7 @@ class DocumentItem(BaseModel):
     jenis_ujian: str
     size_bytes:  int
     ingested:    bool
+    status:      str = Field(default="uploaded", description="'uploaded' | 'ingested' | 'failed'")
     uploaded_at: str
     ingested_at: Optional[str] = None
     chunk_count: int = Field(default=0, description="Jumlah soal/chunk yang berhasil diingest.")
@@ -127,3 +129,31 @@ class DocumentDeleteResponse(BaseModel):
     deleted_from_vectordb: bool
     chunks_removed:        int
     message:               str
+
+
+# ── Ingest Job List ──────────────────────────────────────────────────────────
+
+class IngestJobSummary(BaseModel):
+    """Summary of one ingest job for listing — tidak semua field DetailResponse."""
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    job_id:           str
+    status:           str
+    files_queued:     int      = Field(default=0, validation_alias="total_files")
+    files_processed:  int      = Field(default=0, validation_alias="processed_files")
+    files_failed:     int      = Field(default=0, validation_alias="failed_files")
+    errors:           List[str] = Field(default=[])
+    created_at:       datetime = Field(validation_alias="started_at")
+    completed_at:     Optional[datetime] = None
+
+    @property
+    def duration_seconds(self) -> Optional[float]:
+        if self.completed_at and self.created_at:
+            return (self.completed_at - self.created_at).total_seconds()
+        return None
+
+
+class IngestJobListResponse(BaseModel):
+    """Response untuk GET /v1/documents/ingest — list semua recent jobs."""
+    jobs:  List[IngestJobSummary]
+    total: int

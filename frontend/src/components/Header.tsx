@@ -1,13 +1,15 @@
 import { cn } from "@/lib/utils";
+import type { AppPage } from "@/types/api";
 
 interface HeaderProps {
   onSettingsClick: () => void;
   onResetClick:    () => void;
   isConfigured:    boolean;
   hasMessages:     boolean;
+  currentPage:     AppPage;
 }
 
-export function Header({ onSettingsClick, onResetClick, isConfigured, hasMessages }: HeaderProps) {
+export function Header({ onSettingsClick, onResetClick, isConfigured, hasMessages, currentPage }: HeaderProps) {
   return (
     <header className="border-b border-line bg-canvas/80 backdrop-blur-sm sticky top-0 z-10">
       <div className="mx-auto max-w-3xl px-6 py-4 flex items-center justify-between">
@@ -17,13 +19,11 @@ export function Header({ onSettingsClick, onResetClick, isConfigured, hasMessage
         </div>
 
         <div className="flex items-center gap-2">
-          {hasMessages && (
+          {currentPage === "chat" && hasMessages && (
             <button
               type="button"
               onClick={onResetClick}
-              className={cn(
-                "text-sm text-muted hover:text-ink transition-colors px-3 py-1.5 rounded-md focus-ring",
-              )}
+              className="text-sm text-muted hover:text-ink transition-colors px-3 py-1.5 rounded-md focus-ring"
               aria-label="Mulai sesi baru"
             >
               Sesi baru
