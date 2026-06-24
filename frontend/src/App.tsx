@@ -1,30 +1,44 @@
-/**
- * Placeholder skeleton App component.
- *
- * NOTE: File ini akan di-replace di Batch 6.3 dengan komponen lengkap
- * (Header + ChatWindow + InputBox + SettingsPanel + hooks).
- *
- * Untuk Batch 6.2 cuma minimal "hello world" supaya skeleton bisa di-build
- * dan diverifikasi: Tailwind classes bekerja, Vite bundle berhasil, fonts
- * loaded dari Google Fonts.
- */
+import { useState } from "react";
+import { Header } from "@/components/Header";
+import { ChatWindow } from "@/components/ChatWindow";
+import { InputBox } from "@/components/InputBox";
+import { SettingsPanel } from "@/components/SettingsPanel";
+import { useChat } from "@/hooks/useChat";
+import { useSettings } from "@/hooks/useSettings";
+
 export default function App() {
+  const { settings, updateSettings, isConfigured } = useSettings();
+  const { messages, isSending, send, reset } = useChat(settings);
+
+  const [showSettings, setShowSettings] = useState(!isConfigured);
+
+  const placeholder = isConfigured
+    ? "Tanya soal UTBK apa aja…"
+    : "Set API key dulu di Settings untuk mulai.";
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-canvas px-6">
-      <div className="max-w-md text-center">
-        <span className="inline-block h-12 w-12 rounded-full bg-marker/60 mb-6" />
-        <h1 className="text-3xl font-bold tracking-tight">
-          UTBK <span className="highlight-underline">Tutor</span>
-        </h1>
-        <p className="mt-4 text-muted text-sm leading-relaxed">
-          Frontend skeleton ready. Komponen chat lengkap akan ditambahkan
-          di Batch 6.3.
-        </p>
-        <div className="mt-8 inline-flex items-center gap-2 text-xs font-mono text-muted">
-          <span className="inline-block h-1.5 w-1.5 rounded-full bg-ai" />
-          v0.1 · skeleton
-        </div>
-      </div>
+    <div className="min-h-screen flex flex-col bg-canvas">
+      <Header
+        onSettingsClick={() => setShowSettings(true)}
+        onResetClick={reset}
+        isConfigured={isConfigured}
+        hasMessages={messages.length > 0}
+      />
+
+      <ChatWindow messages={messages} isConfigured={isConfigured} />
+
+      <InputBox
+        onSend={send}
+        disabled={!isConfigured || isSending}
+        placeholder={placeholder}
+      />
+
+      <SettingsPanel
+        open={showSettings}
+        initial={settings}
+        onClose={() => setShowSettings(false)}
+        onSave={updateSettings}
+      />
     </div>
   );
 }

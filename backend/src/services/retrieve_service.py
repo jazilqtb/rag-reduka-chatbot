@@ -78,7 +78,7 @@ class RetrieveService():
 
         # initialize vector_store
         self.vector_store = Chroma(
-            collection_name="RAG_REDUKA_DOC_KNOWLEDGE",
+            collection_name="UTBK_TUTOR_KNOWLEDGE",
             embedding_function=self.embedding_model,
             persist_directory=str(settings.CHROMA_PERSIST_DIR)
         )

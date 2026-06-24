@@ -53,6 +53,10 @@ if __name__ == "__main__":
     print(f"DATA_DIR:       {settings.DATA_DIR}")
     print(f"PROMPT_DIR:     {settings.PROMPT_DIR}")
     print(f"POSTGRES_HOST:  {settings.POSTGRES_HOST}")
+    print(f"POSTGRES_PORT:  {settings.POSTGRES_PORT}")
+    print(f"POSTGRES_USER:  {settings.POSTGRES_USER}")
+    print(f"POSTGRES_PASSWORD:  {settings.POSTGRES_PASSWORD}")
     print(f"POSTGRES_DB:    {settings.POSTGRES_DB}")
     print(f"REDIS_HOST:     {settings.REDIS_HOST}")
+    print(f"REDIS_PORT:     {settings.REDIS_PORT}")
 

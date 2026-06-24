@@ -1,0 +1,26 @@
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+.pytest_cache
+.coverage
+htmlcov
+.venv
+venv
+
+# Data folders — JANGAN di-copy ke build context
+# (akan di-mount via volume di docker-compose.yml)
+data/raw_docs/*
+data/vector_store
+data/debug/*
+!data/raw_docs/.gitkeep
+!data/debug/.gitkeep
+
+# Misc
+.env
+.env.local
+.git
+.gitignore
+*.md

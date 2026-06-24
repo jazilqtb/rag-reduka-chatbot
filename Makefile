@@ -169,7 +169,9 @@ up-ui:
 up-ui-local:
 	cd frontend && npm install && npm run build
 	docker compose -f docker-compose.yml -f docker-compose.local.yml \
-	               --profile ui up -d --build
+	               --profile ui build frontend
+	docker compose -f docker-compose.yml -f docker-compose.local.yml \
+	               --profile ui up -d
 
 down-ui:
 	docker compose --profile ui down
