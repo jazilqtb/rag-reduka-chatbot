@@ -1,5 +1,5 @@
 """
-Entry point aplikasi FastAPI — RAG Reduka Tutor AI UTBK SNBT.
+Entry point aplikasi FastAPI — UTBK Tutor RAG.
 
 Jalankan dengan:
     uvicorn main:app --host 0.0.0.0 --port 8000 --reload
@@ -9,7 +9,6 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 
 from src.api.router import api_router
 from src.core.logger import get_logger
@@ -25,12 +24,25 @@ async def lifespan(app: FastAPI):
     lru_cache di deps.py memastikan service tidak re-init setiap request.
     """
     logger.info("=" * 60)
-    logger.info("  RAG Reduka API — Starting up...")
+    logger.info("  UTBK Tutor RAG API — Starting up...")
     logger.info("=" * 60)
 
-    from src.api.deps import _get_redis_singleton, _get_chat_service_singleton
+    from src.api.deps import _get_chat_service_singleton, _get_redis_singleton
+    from src.db.session import check_db_connection
 
-    # Inisialisasi Redis singleton
+    # 1. PostgreSQL — fail-fast kalau DB tidak reachable
+    try:
+        if check_db_connection():
+            logger.info("  [OK] PostgreSQL connected.")
+        else:
+            logger.error(
+                "  [WARN] PostgreSQL connection failed. "
+                "Document/ingest endpoints akan error."
+            )
+    except Exception as e:
+        logger.error(f"  [WARN] PostgreSQL check failed: {e}")
+
+    # 2. Redis singleton
     try:
         redis = _get_redis_singleton()
         redis.ping()
@@ -38,7 +50,7 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error(f"  [WARN] Redis connection failed: {e}. Lanjut tanpa Redis.")
 
-    # Inisialisasi ChatService singleton (sekaligus RetrieveService + embedding model)
+    # 3. ChatService singleton (sekaligus RetrieveService + embedding model)
     try:
         _get_chat_service_singleton()
         logger.info("  [OK] ChatService initialized (LLM + Embeddings + ChromaDB).")
@@ -46,54 +58,49 @@ async def lifespan(app: FastAPI):
         logger.error(f"  [ERROR] ChatService init failed: {e}")
 
     logger.info("=" * 60)
-    logger.info("  RAG Reduka API — Ready to serve.")
+    logger.info("  UTBK Tutor RAG API — Ready to serve.")
     logger.info("=" * 60)
 
     yield  # Aplikasi berjalan di sini
 
-    logger.info("RAG Reduka API — Shutting down.")
+    logger.info("UTBK Tutor RAG API — Shutting down.")
 
 
 # ── Inisialisasi FastAPI ──────────────────────────────────────────────────────
 app = FastAPI(
-    title="RAG Reduka — Tutor AI UTBK SNBT",
+    title="UTBK Tutor AI — RAG Chatbot",
     description=(
-        "API untuk Tutor AI dari Bimbel Reduka yang membantu siswa SMA/Gapyear "
-        "memahami soal tryout dan materi UTBK SNBT.\n\n"
+        "API untuk chatbot RAG yang membantu siswa SMA / gap-year memahami "
+        "soal-soal tryout UTBK SNBT (ujian masuk PTN di Indonesia).\n\n"
         "**Autentikasi:** Semua endpoint membutuhkan header `X-API-Key`.\n\n"
         "**Rate Limit:** Endpoint `/v1/chat` dibatasi 30 request/menit per user_id."
     ),
-    version="1.0.0",
+    version="0.2.0",
     lifespan=lifespan,
-    docs_url="/docs",
-    redoc_url="/redoc",
-    openapi_url="/openapi.json",
 )
 
 
 # ── CORS ──────────────────────────────────────────────────────────────────────
-# Sesuaikan allow_origins dengan domain BE Golang di production
+# TODO: lock down ke origin frontend di production (Stage 6 saat deploy).
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],        # Ganti ke domain spesifik di production
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins     = ["*"],
+    allow_credentials = True,
+    allow_methods     = ["*"],
+    allow_headers     = ["*"],
 )
 
 
-# ── Mount semua router ────────────────────────────────────────────────────────
+# ── Mount routers ────────────────────────────────────────────────────────────
 app.include_router(api_router, prefix="/v1")
 
 
-# ── Root endpoint (tanpa auth, untuk quick liveness check) ───────────────────
-@app.get("/", tags=["Root"], include_in_schema=False)
+# ── Root endpoint (info) ─────────────────────────────────────────────────────
+@app.get("/", tags=["Root"])
 async def root():
-    return JSONResponse(
-        content={
-            "service": "RAG Reduka Tutor AI",
-            "status":  "running",
-            "docs":    "/docs",
-            "health":  "/v1/health",
-        }
-    )
+    return {
+        "service": "UTBK Tutor AI — RAG Chatbot",
+        "version": app.version,
+        "docs":    "/docs",
+        "health":  "/v1/health",
+    }

@@ -32,7 +32,7 @@ services:
       # To re-init, run: docker compose down -v
       - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     healthcheck:
       test:
         - CMD-SHELL
@@ -53,7 +53,7 @@ services:
     container_name: tutor-utbk-redis
     restart: unless-stopped
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - "${REDIS_PORT}:6379"
     volumes:
       - redis_data:/data
     # AOF persistence: data survives container restart (slower writes than RDB,
@@ -87,6 +87,7 @@ services:
       # service names so the backend container can reach DB & cache.
       POSTGRES_HOST: postgres
       REDIS_HOST: redis
+      REDIS_PORT: "6379"
     volumes:
       # Persist uploaded PDFs, ChromaDB, and debug output outside the container.
       - ./backend/data:/app/data
@@ -115,23 +116,16 @@ services:
   # out until then.
   # ─────────────────────────────────────────────────────────────────────────
   frontend:
+    profiles: ["ui"]
     build:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: tutor-utbk-frontend
-    restart: unless-stopped
     ports:
-      - "${FRONTEND_PORT:-3000}:80"
-    environment:
-      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000}
+      - "3000:80"
     depends_on:
       - backend
-    networks:
-      - tutor-net
-    profiles:
-      # Only start with: docker compose --profile ui up
-      # This way the compose file is valid before frontend/ exists.
-      - ui
+    restart: unless-stopped
 
 
 volumes:

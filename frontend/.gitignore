@@ -1,0 +1,4 @@
+
+# TypeScript incremental build info
+*.tsbuildinfo
+dist

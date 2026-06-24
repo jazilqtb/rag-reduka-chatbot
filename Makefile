@@ -5,6 +5,9 @@
 # Run `make help` (or just `make`) to see all available commands.
 # ============================================================================
 
+include .env
+export
+
 .DEFAULT_GOAL := help
 .PHONY: help install install-backend install-frontend dev dev-frontend \
         test lint format up up-infra down restart logs ps \
@@ -100,8 +103,8 @@ up-infra:
 	docker compose up -d postgres redis
 	@echo ""
 	@echo "✓ Infra ready. Backend can now connect to:"
-	@echo "  PostgreSQL : localhost:$${POSTGRES_PORT:-5432}"
-	@echo "  Redis      : localhost:$${REDIS_PORT:-6379}"
+	@echo "  PostgreSQL : localhost:$${POSTGRES_PORT}"
+	@echo "  Redis      : localhost:$${REDIS_PORT}"
 	@echo ""
 	@echo "  Run backend locally: make dev"
 
@@ -154,3 +157,21 @@ clean-data:
 	@sleep 5
 	@rm -rf backend/data/vector_store/* backend/data/debug/* backend/data/raw_docs/*.pdf 2>/dev/null || true
 	@echo "✓ Data cleaned."
+
+# ─── Frontend Build Modes ────────────────────────────────────────────────────
+
+# Mode default: build di container (standar untuk user di GitHub)
+up-ui:
+	docker compose --profile ui up -d
+
+# Mode local: pre-build di host, copy ke nginx container
+# Gunakan kalau npm registry dari dalam Docker container lambat / tidak reachable
+up-ui-local:
+	cd frontend && npm install && npm run build
+	docker compose -f docker-compose.yml -f docker-compose.local.yml \
+	               --profile ui build frontend
+	docker compose -f docker-compose.yml -f docker-compose.local.yml \
+	               --profile ui up -d
+
+down-ui:
+	docker compose --profile ui down

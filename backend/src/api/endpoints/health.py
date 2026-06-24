@@ -1,18 +1,13 @@
 """
 Endpoints: Health Check
-  GET /v1/health          — Fast liveness check (<50ms, tanpa API call eksternal)
-  GET /v1/health/detailed — Detailed readiness check (Redis + ChromaDB + Storage)
+  GET /v1/health           — Fast liveness check (no external calls)
+  GET /v1/health/detailed  — Readiness check (ping Redis + PostgreSQL + ChromaDB)
 
-Catatan desain:
-  - Gemini API TIDAK di-ping di health check untuk menghindari biaya dan latency.
-    Ketersediaan model diindikasikan hanya dari konfigurasi (model name + API key tersedia).
-  - /v1/health bisa dipakai sebagai liveness probe (k8s/docker).
-  - /v1/health/detailed bisa dipakai sebagai readiness probe.
+Stage 4: Tambah komponen PostgreSQL di detailed check.
 """
 
 import time
 from datetime import datetime, timezone
-from pathlib import Path
 
 from fastapi import APIRouter, Depends
 from redis import Redis
@@ -20,13 +15,14 @@ from redis import Redis
 from src.api.deps import get_redis
 from src.core.config import settings
 from src.core.logger import get_logger
+from src.db.session import check_db_connection
 from src.domain.schemas import (
     ComponentStatus,
     HealthDetailedResponse,
     HealthResponse,
 )
 
-router = APIRouter(prefix="/health", tags=["Health"])
+router = APIRouter(tags=["Health"])
 logger = get_logger("endpoint.health")
 
 
@@ -35,41 +31,30 @@ def _utcnow_iso() -> str:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# GET /v1/health — Fast liveness check
+# LIVENESS — Fast check, no external calls
 # ══════════════════════════════════════════════════════════════════════════════
 
 @router.get(
-    "",
+    "/health",
     response_model=HealthResponse,
-    summary="Liveness check",
-    description=(
-        "Cek cepat apakah service sedang berjalan. "
-        "Tidak melakukan pengecekan ke dependensi eksternal (Redis, ChromaDB). "
-        "Cocok dipakai sebagai **liveness probe**."
-    ),
+    summary="Liveness check (cepat, tanpa external call)",
+    description="Cek apakah server hidup. Tidak ping ke Redis/Postgres/ChromaDB.",
 )
 async def health_check() -> HealthResponse:
-    return HealthResponse(
-        status    = "ok",
-        timestamp = _utcnow_iso(),
-    )
+    return HealthResponse(status="ok", timestamp=_utcnow_iso())
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# GET /v1/health/detailed — Readiness check
+# READINESS — Detailed check, ping all dependencies
 # ══════════════════════════════════════════════════════════════════════════════
 
 @router.get(
-    "/detailed",
+    "/health/detailed",
     response_model=HealthDetailedResponse,
-    summary="Readiness check (detail semua komponen)",
+    summary="Readiness check (lengkap, ping semua dependency)",
     description=(
-        "Cek status semua komponen yang dibutuhkan service:\n\n"
-        "- **redis**: Koneksi Redis (PING)\n"
-        "- **chromadb**: ChromaDB collection & jumlah dokumen\n"
-        "- **gemini**: Validasi konfigurasi model (tanpa API call agar tidak berbiaya)\n"
-        "- **storage**: Aksesibilitas direktori raw_docs\n\n"
-        "Overall `status` = `ok` hanya jika semua komponen `ok`. "
+        "Ping semua dependency: PostgreSQL, Redis, ChromaDB, dan validasi config Gemini. "
+        "Tidak memanggil Gemini API untuk menghemat cost & latency. "
         "Jika ada yang `error`, status menjadi `degraded` atau `down`."
     ),
 )
@@ -80,7 +65,33 @@ async def health_check_detailed(
     components: dict[str, ComponentStatus] = {}
     any_error = False
 
-    # ── 1. Redis ──────────────────────────────────────────────────────────────
+    # ── 1. PostgreSQL ─────────────────────────────────────────────────────────
+    t0 = time.perf_counter()
+    try:
+        if check_db_connection():
+            db_latency = int((time.perf_counter() - t0) * 1000)
+            components["postgres"] = ComponentStatus(
+                status     = "ok",
+                latency_ms = db_latency,
+                detail     = (
+                    f"Connected to {settings.POSTGRES_HOST}:{settings.POSTGRES_PORT}/"
+                    f"{settings.POSTGRES_DB}"
+                ),
+            )
+        else:
+            any_error = True
+            components["postgres"] = ComponentStatus(
+                status = "error",
+                detail = (
+                    f"Cannot connect to {settings.POSTGRES_HOST}:{settings.POSTGRES_PORT}/"
+                    f"{settings.POSTGRES_DB}"
+                ),
+            )
+    except Exception as e:
+        any_error = True
+        components["postgres"] = ComponentStatus(status="error", detail=str(e))
+
+    # ── 2. Redis ──────────────────────────────────────────────────────────────
     t0 = time.perf_counter()
     try:
         redis.ping()
@@ -92,12 +103,9 @@ async def health_check_detailed(
         )
     except Exception as e:
         any_error = True
-        components["redis"] = ComponentStatus(
-            status = "error",
-            detail = str(e),
-        )
+        components["redis"] = ComponentStatus(status="error", detail=str(e))
 
-    # ── 2. ChromaDB ───────────────────────────────────────────────────────────
+    # ── 3. ChromaDB ───────────────────────────────────────────────────────────
     t0 = time.perf_counter()
     try:
         from langchain_chroma import Chroma
@@ -109,7 +117,7 @@ async def health_check_detailed(
             google_api_key=settings.GOOGLE_API_KEY,
         )
         vector_store = Chroma(
-            collection_name="RAG_REDUKA_DOC_KNOWLEDGE",
+            collection_name="UTBK_TUTOR_KNOWLEDGE",
             embedding_function=emb,
             persist_directory=str(settings.CHROMA_PERSIST_DIR),
         )
@@ -118,22 +126,19 @@ async def health_check_detailed(
         components["chromadb"] = ComponentStatus(
             status     = "ok",
             latency_ms = chroma_latency,
-            detail     = f"Collection 'RAG_REDUKA_DOC_KNOWLEDGE' — {doc_count} dokumen.",
+            detail     = f"Collection 'UTBK_TUTOR_KNOWLEDGE' — {doc_count} dokumen.",
         )
     except Exception as e:
         any_error = True
-        components["chromadb"] = ComponentStatus(
-            status = "error",
-            detail = str(e),
-        )
+        components["chromadb"] = ComponentStatus(status="error", detail=str(e))
 
-    # ── 3. Gemini Config (tanpa API call) ────────────────────────────────────
+    # ── 4. Gemini Config (tanpa API call) ────────────────────────────────────
     # Kita hanya cek apakah API key dan model name terkonfigurasi.
     # Memanggil Gemini API di health check akan membuang token dan menambah latency.
     try:
-        api_key_set  = bool(getattr(settings, "GOOGLE_API_KEY", ""))
-        model_name   = getattr(settings, "GENAI_MODEL", "")
-        embed_name   = getattr(settings, "EMBEDDING_MODEL", "")
+        api_key_set = bool(getattr(settings, "GOOGLE_API_KEY", ""))
+        model_name  = getattr(settings, "GENAI_MODEL", "")
+        embed_name  = getattr(settings, "EMBEDDING_MODEL", "")
 
         if api_key_set and model_name and embed_name:
             components["gemini"] = ComponentStatus(
@@ -151,12 +156,9 @@ async def health_check_detailed(
             )
     except Exception as e:
         any_error = True
-        components["gemini"] = ComponentStatus(
-            status = "error",
-            detail = str(e),
-        )
+        components["gemini"] = ComponentStatus(status="error", detail=str(e))
 
-    # ── 4. Storage (raw_docs dir) ─────────────────────────────────────────────
+    # ── 5. Storage (raw_docs dir) ─────────────────────────────────────────────
     try:
         raw_docs_dir = settings.DATA_DIR / "raw_docs"
         accessible   = raw_docs_dir.exists() and raw_docs_dir.is_dir()
@@ -175,20 +177,19 @@ async def health_check_detailed(
             )
     except Exception as e:
         any_error = True
-        components["storage"] = ComponentStatus(
-            status = "error",
-            detail = str(e),
-        )
+        components["storage"] = ComponentStatus(status="error", detail=str(e))
 
     # ── Overall status ────────────────────────────────────────────────────────
     # "ok"       → semua komponen ok
-    # "degraded" → redis ok tapi ada komponen lain error (masih bisa serve)
-    # "down"     → redis error (tidak bisa menyimpan history / rate limit)
-    redis_ok = components.get("redis", ComponentStatus(status="error")).status == "ok"
+    # "degraded" → core (postgres+redis) ok tapi ada komponen lain error
+    # "down"     → core (postgres atau redis) error — tidak bisa serve traffic
+    postgres_ok = components.get("postgres", ComponentStatus(status="error")).status == "ok"
+    redis_ok    = components.get("redis",    ComponentStatus(status="error")).status == "ok"
+    core_ok     = postgres_ok and redis_ok
 
     if not any_error:
         overall = "ok"
-    elif redis_ok:
+    elif core_ok:
         overall = "degraded"
     else:
         overall = "down"

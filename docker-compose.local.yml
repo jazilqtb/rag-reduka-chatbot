@@ -1,0 +1,16 @@
+# ============================================================================
+# Override untuk pre-build local mode.
+# 
+# Pakai bersamaan dengan docker-compose.yml utama:
+#   docker compose -f docker-compose.yml -f docker-compose.local.yml \
+#                  --profile ui up -d --build
+#
+# Override yang dilakukan:
+#   - frontend.build.dockerfile: pakai Dockerfile.local (bukan Dockerfile)
+# ============================================================================
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.local

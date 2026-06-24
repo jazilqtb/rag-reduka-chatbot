@@ -1,0 +1,24 @@
+# Dependencies — akan di-install fresh di container (Dockerfile utama)
+node_modules
+
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# IDE / editor
+.vscode
+.idea
+*.swp
+.DS_Store
+
+# Local env
+.env.local
+.env.development.local
+.env.production.local
+
+# Build artifacts (TypeScript incremental)
+*.tsbuildinfo
+
+# Misc
+*.log

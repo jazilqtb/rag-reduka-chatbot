@@ -36,3 +36,10 @@ data/raw_docs/*.pdf
 
 # Docker
 *.log
+
+
+# ─── Frontend ───────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+frontend/*.tsbuildinfo

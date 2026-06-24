@@ -5,6 +5,7 @@ Semua dependency diinject via FastAPI Depends() — tidak ada yang diinstansiasi
 langsung di endpoint. Ini memastikan:
   - Singleton service (LLM client tidak re-init setiap request)
   - Validasi terpusat (API key, rate limit, format ID)
+  - DB session per-request (auto-close on completion)
   - Mudah di-mock saat unit testing
 """
 
@@ -14,10 +15,13 @@ from typing import Optional
 
 from fastapi import Depends, Header, HTTPException, status
 from redis import Redis
+from sqlalchemy.orm import Session
 
 from src.core.config import settings
 from src.core.logger import get_logger
 from src.core.security import verify_api_key, check_rate_limit
+from src.db.repositories import DocumentRepository, IngestJobRepository
+from src.db.session import get_db_session
 from src.services.chat_service import ChatService
 
 logger = get_logger("deps")
@@ -30,7 +34,7 @@ _RE_JOB_ID     = re.compile(r"^job_[a-zA-Z0-9_]{1,80}$")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# SINGLETON SERVICES
+# SINGLETON SERVICES (LLM, embedding, Redis client)
 # ══════════════════════════════════════════════════════════════════════════════
 
 @lru_cache(maxsize=1)
@@ -73,11 +77,40 @@ def get_chat_service() -> ChatService:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# DATABASE — Session & Repository factories
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# get_db_session di-re-export dari src.db.session supaya endpoint hanya perlu
+# import dari satu tempat. Repository factories memudahkan endpoint:
+#
+#   def endpoint(doc_repo: DocumentRepository = Depends(get_document_repository)):
+#       doc = doc_repo.create(...)
+#
+# Setiap request dapat session sendiri. FastAPI auto-close session di akhir
+# request (lihat get_db_session implementation).
+#
+# ══════════════════════════════════════════════════════════════════════════════
+
+def get_document_repository(
+    db: Session = Depends(get_db_session),
+) -> DocumentRepository:
+    """Dependency: kembalikan DocumentRepository dengan session aktif."""
+    return DocumentRepository(db)
+
+
+def get_ingest_job_repository(
+    db: Session = Depends(get_db_session),
+) -> IngestJobRepository:
+    """Dependency: kembalikan IngestJobRepository dengan session aktif."""
+    return IngestJobRepository(db)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # AUTHENTICATION
 # ══════════════════════════════════════════════════════════════════════════════
 
 async def require_api_key(
-    x_api_key: Optional[str] = Header(default=None, alias="X-API-Key")
+    x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"),
 ) -> None:
     """
     Dependency: validasi X-API-Key header.
@@ -165,23 +198,6 @@ def valid_job_id(job_id: str) -> str:
 # ══════════════════════════════════════════════════════════════════════════════
 # RATE LIMITING
 # ══════════════════════════════════════════════════════════════════════════════
-
-def build_rate_limit_dep(user_id_source: str = "body"):
-    """
-    Factory untuk membuat dependency rate limiter.
-    Dipakai di endpoint chat yang butuh rate limiting per user_id.
-
-    Penggunaan di endpoint:
-        async def chat(req: ChatRequest, _: None = Depends(chat_rate_limit)):
-    """
-    async def _rate_limit_dep(
-        # user_id didapat dari request body yang sudah divalidasi sebelumnya
-        # Dependency ini dipanggil setelah body parsed, tapi kita perlu user_id
-        # Solusi: caller inject user_id secara manual (lihat chat.py)
-    ):
-        pass
-    return _rate_limit_dep
-
 
 async def apply_chat_rate_limit(
     user_id: str,
