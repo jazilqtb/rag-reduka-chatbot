@@ -1,11 +1,9 @@
 # Engineering Journal
 
-Catatan proses development — bukan dokumentasi formal. Format storytelling
-per milestone, fokus ke *kenapa* dan *trade-off apa yang diterima*.
+Catatan proses development
 
 > **Format ADR (Architecture Decision Record) per keputusan lengkap ada di**
-> `docs/decisions/`. Journal ini cerita yang lebih naratif tentang perjalanan
-> development.
+> `docs/decisions/`.
 
 ---
 
@@ -19,8 +17,9 @@ besar di musim tryout. Dua hal jadi prioritas dari awal:
    bertanya satu soal yang sama dengan kalimat berbeda.
 2. **Latency request pertama**. Cold start LLM client bisa 3-5 detik kalau
    diinstansiasi per request.
+3. **Retrieve soal spesifik**. Pertanyaan siswa akan selalu merujuk pada soal tertentu dengan query berupa nomor soal dan kategori soal, tidak bisa diselesaikan hanya dengan similarity search biasa.
 
-Sebagian besar keputusan teknis di bawah berakar dari dua kendala itu.
+Sebagian besar keputusan teknis di bawah berakar dari tiga kendala itu.
 
 ---
 
@@ -80,17 +79,17 @@ Detail di [ADR 0003](decisions/0003-hybrid-history.md).
 Reduka tidak lanjut menggunakan service ini secara reguler, jadi saya
 putuskan repackage jadi project pribadi untuk portfolio. Tantangannya:
 
-1. **Branding "Reduka" tersebar di kode** — title FastAPI, collection name
-   ChromaDB (`RAG_REDUKA_DOC_KNOWLEDGE`), schema description, prefix Redis.
-2. **Tidak ada UI** — service ini awalnya hanya dipanggil dari BE Golang.
+1. **Tidak ada UI** — service ini awalnya hanya dipanggil dari BE Golang.
    Orang luar tidak bisa "merasakan" kualitas chatbot tanpa nulis client.
-3. **Storage metadata di Redis** — semua document metadata di-store sebagai
+2. **Storage metadata di Redis** — semua document metadata di-store sebagai
    Redis HASH dengan SET index. Cepat tapi tidak queryable, dan ilang kalau
    Redis restart tanpa AOF.
-4. **Ingestion non-incremental** — `IngestionService` di-design awal untuk
+3. **Ingestion non-incremental** — `IngestionService` di-design awal untuk
    one-shot init: `__init__` me-reset ChromaDB dengan `shutil.rmtree`. Saat
    user upload file baru, semua data lama hilang.
-5. **Tidak ada test infrastructure** — no `tests/`, no pytest, no fixtures.
+4. **Tidak ada test infrastructure** — no `tests/`, no pytest, no fixtures.
+
+> *Lihat branch "Main" untuk mengetahui raw project sebelum refactor ke format Portfolio*
 
 Saya bagi pengerjaan ke 6 stage supaya tiap stage punya output yang
 bisa di-commit dan tidak meninggalkan project broken di tengah jalan.

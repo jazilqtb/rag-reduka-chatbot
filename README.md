@@ -23,6 +23,8 @@ Project ini awalnya dirancang sebagai backend service untuk frontend startup
 edtech bernama Reduka, lalu di-repackage sebagai project pribadi dengan UI
 mandiri supaya siapa pun bisa mencobanya.
 
+> *Lihat branch "Main" untuk mengetahui raw project sebelum di-repackage ke format Portfolio*
+
 Inti masalahnya: siswa yang baru selesai tryout UTBK biasanya bingung dengan
 soal yang dijawab salah — mereka tahu kuncinya tapi tidak tahu **kenapa**
 jawabannya itu. Tutor AI ini mengambil PDF soal + kunci jawaban, mengingest
